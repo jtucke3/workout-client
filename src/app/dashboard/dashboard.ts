@@ -28,7 +28,8 @@ export class Dashboard {
   }
 
   logout() {
-    // Optional: clear auth token or localStorage here
-    this.router.navigateByUrl('/');
-  }
+    localStorage.removeItem('token'); // or sessionStorage
+    fetch('/api/auth/logout', { method: 'POST' });
+    window.location.href = '/login';
+}
 }
