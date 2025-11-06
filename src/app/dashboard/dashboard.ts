@@ -28,8 +28,12 @@ export class Dashboard {
   }
 
   logout() {
-    localStorage.removeItem('token'); // or sessionStorage
+    localStorage.removeItem('token');
     fetch('/api/auth/logout', { method: 'POST' });
     window.location.href = '/login';
 }
+
+  goToProfile() {
+    this.router.navigateByUrl('/profile');
+  }
 }
