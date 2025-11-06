@@ -1,0 +1,65 @@
+.profile-header {
+  position: sticky;
+  top: 0;
+  background: rgba(30,41,59,0.95);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(148,163,184,0.08);
+}
+
+.back-btn {
+  height: 36px;
+  padding: 0 1rem;
+  border: none;
+  border-radius: 8px;
+  background: #3b82f6;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.profile-content {
+  padding: 1.5rem;
+}
+
+.error {
+  color: #fecaca; /* light red */
+  background: rgba(255, 0, 0, 0.03);
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+}
+
+.field-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.field-label {
+  min-width: 90px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.field-value {
+  flex: 1 1 auto;
+  padding: 0.5rem 0.75rem;
+  background: #f8fafc;
+  border-radius: 6px;
+  color: #0f172a;
+}
+
+.change-btn {
+  height: 34px;
+  padding: 0 0.75rem;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #2563eb;
+  font-weight: 700;
+  cursor: pointer;
+}
