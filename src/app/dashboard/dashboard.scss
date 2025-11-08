@@ -43,6 +43,32 @@
     &:active { transform: translateY(1px); }
   }
 
+  .top-actions {
+    display: flex;
+    align-items: center;
+  }
+
+  .profile-btn {
+    height: 36px;
+    padding: 0 1rem;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: #cbd5e1;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, transform 0.04s;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-right: 0.5rem;
+
+    &:hover {
+      background: rgba(255,255,255,0.04);
+      color: #ffffff;
+    }
+    &:active { transform: translateY(1px); }
+  }
+
   /* For very small screens */
   @media (max-width: 480px) {
     flex-direction: column;
