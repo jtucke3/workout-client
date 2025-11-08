@@ -1,3 +1,30 @@
-<app-navbar></app-navbar>
+<div><app-navbar></app-navbar></div>
 
-<p>profile works!</p>
+<!-- <header class="profile-header">
+  <h1>Profile</h1>
+  <button class="back-btn" (click)="goBack()">Back</button>
+</header> -->
+
+<main class="profile-content">
+  <div *ngIf="isLoading()">
+    <p>Loading profile...</p>
+  </div>
+
+  <div *ngIf="error()" class="error">
+    <p>{{ error() }}</p>
+  </div>
+
+  <div *ngIf="!isLoading() && profile() as p">
+    <div class="field-row">
+      <div class="field-label">Email</div>
+      <div class="field-value">{{ p.email || 'Not available' }}</div>
+      <button class="change-btn" (click)="onChangeEmail()">Change</button>
+    </div>
+
+    <div class="field-row">
+      <div class="field-label">Username</div>
+      <div class="field-value">{{ p.username || 'Not available' }}</div>
+      <button class="change-btn" (click)="onChangeUsername()">Change</button>
+    </div>
+  </div>
+</main>
