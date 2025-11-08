@@ -2,10 +2,11 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { UnitService } from '../services/unit.service';
+import { Navbar } from '../navbar/navbar';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule],
+  imports: [CommonModule, Navbar],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
