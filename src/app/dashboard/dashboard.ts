@@ -27,10 +27,4 @@ export class Dashboard {
   get weightSymbol(): string {
     return this.unitService.getSymbol();
   }
-
-  logout() {
-    localStorage.removeItem('token');
-    fetch('/api/auth/logout', { method: 'POST' });
-    window.location.href = '/login';
-  }
 }

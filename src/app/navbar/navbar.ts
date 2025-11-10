@@ -10,9 +10,9 @@ import { RouterModule } from '@angular/router';
 })
 export class Navbar {
 
-  // logout() {
-  //   localStorage.removeItem('token');
-  //   fetch('/api/auth/logout', { method: 'POST' });
-  //   window.location.href = '/login';
-  // }
+  logout() {
+    localStorage.removeItem('token');
+    fetch('/api/auth/logout', { method: 'POST' });
+    window.location.href = '/login';
+  }
 }

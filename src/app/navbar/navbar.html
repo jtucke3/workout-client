@@ -1,14 +1,14 @@
 <nav class="navbar">
 
   <ul class="nav-links">
-    <li><a routerLink="/homepage" routerLinkActive="active">Home</a></li>
+    <li><a routerLink="/dashboard" routerLinkActive="active">Home</a></li>
     <li><a routerLink="/meals" routerLinkActive="active">Meals</a></li>
     <li><a routerLink="/workouts" routerLinkActive="active">Workouts</a></li>
     <li><a routerLink="/goals" routerLinkActive="active">Goals</a></li>
     <li><a routerLink="/friends" routerLinkActive="active">Friends</a></li>
-    <li><a routerLink="/help" routerLinkActive="active">Help</a></li>
+    <li><a routerLink="/about" routerLinkActive="active">Help</a></li>
     <li><a routerLink="/profile" routerLinkActive="active">Profile</a></li>
   </ul>
 
-  <button class="logout-btn">Logout</button>
+  <button class="logout-btn" (click)="logout()">Logout</button>
 </nav>
