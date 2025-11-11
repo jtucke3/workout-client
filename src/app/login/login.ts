@@ -28,12 +28,18 @@ export class Login {
     this.isLoading.set(true);
     this.loginError.set(null);
 
-    const { email, password } = this.form.getRawValue();
+    const { email, password, remember } = this.form.getRawValue();
 
     try {
       // Test credentials
       if (email === 'test@example.com' && password === 'password123') {
-        localStorage.setItem('token', 'test-token');
+        if (remember) {
+          localStorage.setItem('token', 'test-token');
+        }
+        else {
+          sessionStorage.setItem('token', 'test-token');
+        }
+        //localStorage.setItem('token', 'test-token');
         this.router.navigateByUrl('/dashboard');
         return;
       }
@@ -53,7 +59,12 @@ export class Login {
       if (data.requires2FA) {
         this.loginError.set('2FA verification required.');
       } else if (data.token) {
-        localStorage.setItem('token', data.token);
+        if (remember) {
+          localStorage.setItem('token', data.token);
+        }
+        else {
+          sessionStorage.setItem('token', data.token);
+        }
         this.router.navigateByUrl('/dashboard');
       } else {
         throw new Error('No token returned from backend');
