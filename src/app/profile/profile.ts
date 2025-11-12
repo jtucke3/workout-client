@@ -24,7 +24,12 @@ export class Profile implements OnInit {
   profile = signal<UserProfile | null>(null);
 
   ngOnInit() {
-    this.loadProfile();
+    // Only run profile loading in the browser. localStorage / window are not available during SSR.
+    if (typeof window !== 'undefined') {
+      this.loadProfile();
+    } else {
+      this.isLoading.set(false);
+    }
   }
 
   async loadProfile() {
@@ -32,7 +37,10 @@ export class Profile implements OnInit {
     this.error.set(null);
 
     try {
-      const res = await fetch('/api/auth/me');
+  const token = localStorage.getItem('token');
+  const headers: Record<string,string> = { 'Accept': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch('/api/auth/me', { headers });
 
       if (res.status === 401) {
         this.router.navigateByUrl('/login');
@@ -48,8 +56,15 @@ export class Profile implements OnInit {
 
       if (contentType.includes('application/json')) {
         data = await res.json();
-        this.profile.set(data || null);
-        try { localStorage.setItem('user', JSON.stringify(data)); } catch {}
+        // Normalize user fields: prefer username, fallback to displayName
+        const normalized = {
+          username: data.username ?? data.displayName ?? data.email,
+          email: data.email,
+          preferredUnit: data.preferredUnit,
+          weight: data.weight
+        };
+        this.profile.set(normalized || null);
+        try { localStorage.setItem('user', JSON.stringify(normalized)); } catch {}
       } else {
         const cached = localStorage.getItem('user');
         if (cached) {
@@ -62,7 +77,17 @@ export class Profile implements OnInit {
     } catch (e: any) {
       const cached = localStorage.getItem('user');
       if (cached) {
-        try { this.profile.set(JSON.parse(cached)); } catch {}
+        try {
+          const parsed = JSON.parse(cached);
+          // normalize cached shape too
+          const normalized = {
+            username: parsed.username ?? parsed.displayName ?? parsed.email,
+            email: parsed.email,
+            preferredUnit: parsed.preferredUnit,
+            weight: parsed.weight
+          };
+          this.profile.set(normalized);
+        } catch {}
       } else {
         this.profile.set({});
         console.warn('Profile load failed and no cached data available:', e);
