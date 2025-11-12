@@ -54,7 +54,7 @@
             autocomplete="new-password"
             [class.invalid]="form.get('confirm')?.invalid && form.get('confirm')?.touched" />
           <small *ngIf="form.get('confirm')?.invalid && form.get('confirm')?.touched">Confirm your password.</small>
-          <div *ngIf="showPasswordMatchStatus()" class="password-match-indicator">
+          <div *ngIf="showPasswordMatchStatus" class="password-match-indicator">
             <span *ngIf="passwordsMatch === true" class="match-success">✓ Passwords match</span>
             <span *ngIf="passwordsMatch === false" class="match-error">✗ Passwords do not match</span>
           </div>
