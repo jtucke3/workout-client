@@ -16,6 +16,7 @@ export class Register {
 
   isLoading = signal(false);
   registerError = signal<string | null>(null);
+  showPassword = signal(false);
 
   form = this.fb.group({
     name: ['', [Validators.required]],
@@ -99,5 +100,22 @@ export class Register {
     } finally {
       this.isLoading.set(false);
     }
+  }
+
+  togglePassword() {
+    this.showPassword.update(show => !show);
+  }
+
+  get passwordsMatch(): boolean | null {
+    const password = this.form.get('password')?.value;
+    const confirm = this.form.get('confirm')?.value;
+    
+    if (!password || !confirm) return null;
+    return password === confirm;
+  }
+
+  get showPasswordMatchStatus(): boolean {
+    const confirmControl = this.form.get('confirm');
+    return !!(confirmControl?.value && confirmControl?.touched);
   }
 }
