@@ -2,10 +2,11 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { UnitService } from '../services/unit.service';
+import { Navbar } from '../navbar/navbar';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule],
+  imports: [CommonModule, Navbar],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
@@ -25,15 +26,5 @@ export class Dashboard {
   // Get unit symbol (lbs / kg)
   get weightSymbol(): string {
     return this.unitService.getSymbol();
-  }
-
-  logout() {
-    localStorage.removeItem('token');
-    fetch('/api/auth/logout', { method: 'POST' });
-    window.location.href = '/login';
-}
-
-  goToProfile() {
-    this.router.navigateByUrl('/profile');
   }
 }

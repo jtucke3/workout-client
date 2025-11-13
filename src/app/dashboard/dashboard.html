@@ -1,14 +1,7 @@
-<header class="top-bar">
-  <h1>Workout App Dashboard</h1>
-  <div class="top-actions">
-    <button class="profile-btn" (click)="goToProfile()">Profile</button>
-    <button class="logout-btn" (click)="logout()">Logout</button>
-  </div>
-</header>
-
+<app-navbar></app-navbar>
 <main class="dashboard-content">
   <p>Dashboard works!</p>
-  
+
   <div class="weight-display">
     <p>Current weight: {{ displayedWeight | number:'1.0-1' }} {{ weightSymbol }}</p>
   </div>
