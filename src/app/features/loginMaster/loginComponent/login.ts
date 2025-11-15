@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { LoginService } from '../loginService/login.service';
 
 @Component({
   standalone: true,
@@ -13,6 +14,7 @@ import { Router } from '@angular/router';
 export class Login {
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private loginService = inject(LoginService);
 
   isLoading = signal(false);
   loginError = signal<string | null>(null);
@@ -24,7 +26,10 @@ export class Login {
   });
 
   async submit() {
-    if (this.form.invalid) return;
+    if (this.form.invalid){
+      this.form.markAllAsTouched();
+      return;
+    }
     this.isLoading.set(true);
     this.loginError.set(null);
 
@@ -44,35 +49,27 @@ export class Login {
         return;
       }
 
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+      const response = await this.loginService.login({
+        email: email!,
+        password: password!
       });
 
-      if (!response.ok) {
-        throw new Error('Invalid credentials or server error');
+      if (response.requires2FA) {
+        // TODO: handle 2FA step later (e.g., show 2FA component)
+        this.loginError.set('2FA verification required (frontend flow TBD).');
+        return;
       }
 
-      const data = await response.json();
 
-      if (data.requires2FA) {
-        this.loginError.set('2FA verification required.');
-      } else if (data.token) {
-        if (remember) {
-          localStorage.setItem('token', data.token);
-        }
-        else {
-          sessionStorage.setItem('token', data.token);
-        }
+      if (response.token) {
+        this.loginService.storeToken(response.token, !!remember);
         this.router.navigateByUrl('/dashboard');
       } else {
         throw new Error('No token returned from backend');
       }
-
     } catch (err: any) {
       console.error('Login error:', err);
-      this.loginError.set('Login failed: ' + err.message);
+      this.loginError.set('Login failed: ' + (err.message || 'Unknown error'));
     } finally {
       this.isLoading.set(false);
     }
