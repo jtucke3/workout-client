@@ -1,8 +1,8 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, EventEmitter, inject, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
 import { LoginService } from '../loginService/login.service';
+import { LoginRequestWebVo } from '../loginModels/login-api.models';
 
 @Component({
   standalone: true,
@@ -13,16 +13,19 @@ import { LoginService } from '../loginService/login.service';
 })
 export class Login {
   private fb = inject(FormBuilder);
-  private router = inject(Router);
   private loginService = inject(LoginService);
+  
+  @Output() loginSuccess = new EventEmitter<void>();
+  @Output() twoFaRequired = new EventEmitter<{ challengeId: string; remember: boolean }>();
+
 
   isLoading = signal(false);
   loginError = signal<string | null>(null);
 
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
-    remember: [true]
+    password: ['', [Validators.required]],
+    remember: [false]
   });
 
   async submit() {
@@ -36,37 +39,29 @@ export class Login {
     const { email, password, remember } = this.form.getRawValue();
 
     try {
-      // Test credentials
-      if (email === 'test@example.com' && password === 'password123') {
-        if (remember) {
-          localStorage.setItem('token', 'test-token');
-        }
-        else {
-          sessionStorage.setItem('token', 'test-token');
-        }
-        //localStorage.setItem('token', 'test-token');
-        this.router.navigateByUrl('/dashboard');
-        return;
-      }
-
-      const response = await this.loginService.login({
+      const payload: LoginRequestWebVo = {
         email: email!,
-        password: password!
-      });
+        password: password!,
+      };
 
-      if (response.requires2FA) {
-        // TODO: handle 2FA step later (e.g., show 2FA component)
-        this.loginError.set('2FA verification required (frontend flow TBD).');
+      const response = await this.loginService.login(payload);
+
+      if (response.requires2FA && response.challengeId) {
+        this.twoFaRequired.emit({
+          challengeId: response.challengeId,
+          remember: !!remember,
+        });
         return;
       }
 
 
       if (response.token) {
         this.loginService.storeToken(response.token, !!remember);
-        this.router.navigateByUrl('/dashboard');
-      } else {
-        throw new Error('No token returned from backend');
+        this.loginSuccess.emit();
+        return;
       }
+
+      throw new Error('No token or 2FA challenge returned from server');
     } catch (err: any) {
       console.error('Login error:', err);
       this.loginError.set('Login failed: ' + (err.message || 'Unknown error'));

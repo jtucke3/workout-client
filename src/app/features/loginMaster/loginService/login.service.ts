@@ -14,7 +14,7 @@ export class LoginService {
   private http = inject(HttpClient);
 
   // if you later add environments, change this to environment.apiBaseUrl + '/auth'
-  private readonly API_BASE = 'http://localhost:8080/api/auth';
+  private readonly API_BASE = '/api/auth';
 
   login(req: LoginRequestWebVo): Promise<LoginResponseWebVo> {
     return firstValueFrom(
