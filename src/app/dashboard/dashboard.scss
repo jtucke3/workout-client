@@ -97,8 +97,6 @@
 }
 
 .dashboard-content {
-  padding: 80px 2rem 2rem; /* top padding = top-bar height + margin */
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  padding-top: 60px;
+  margin: 10px;
 }

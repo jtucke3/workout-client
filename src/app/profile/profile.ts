@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { Navbar } from '../navbar/navbar';
 
 type UserProfile = {
   username?: string;
@@ -12,7 +13,7 @@ type UserProfile = {
 @Component({
   standalone: true,
   selector: 'app-profile',
-  imports: [CommonModule],
+  imports: [CommonModule, Navbar],
   templateUrl: './profile.html',
   styleUrls: ['./profile.scss']
 })
