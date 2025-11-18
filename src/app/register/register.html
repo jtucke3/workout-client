@@ -1,0 +1,89 @@
+<section class="screen">
+  <div class="card">
+    <header class="card-head">
+      <h1>Create account</h1>
+      <p>Sign up to track your workouts and progress</p>
+    </header>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="form">
+      <div class="row">
+        <div class="field">
+          <label for="name">Full name</label>
+          <input 
+            id="name" 
+            type="text" 
+            formControlName="name" 
+            placeholder="Jane Doe"
+            [class.invalid]="form.get('name')?.invalid && form.get('name')?.touched" />
+          <small *ngIf="form.get('name')?.invalid && form.get('name')?.touched">Enter your name.</small>
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input 
+            id="email" 
+            type="email" 
+            formControlName="email" 
+            placeholder="you@example.com"
+            autocomplete="email"
+            [class.invalid]="form.get('email')?.invalid && form.get('email')?.touched" />
+          <small *ngIf="form.get('email')?.invalid && form.get('email')?.touched">Enter a valid email.</small>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="password">Password</label>
+          <input 
+            id="password" 
+            [type]="showPassword() ? 'text' : 'password'" 
+            formControlName="password" 
+            placeholder="••••••••"
+            autocomplete="new-password"
+            [class.invalid]="form.get('password')?.invalid && form.get('password')?.touched" />
+          <small *ngIf="form.get('password')?.invalid && form.get('password')?.touched">Min 6 characters.</small>
+        </div>
+
+        <div class="field">
+          <label for="confirm">Confirm password</label>
+          <input 
+            id="confirm" 
+            [type]="showPassword() ? 'text' : 'password'" 
+            formControlName="confirm" 
+            placeholder="••••••••"
+            autocomplete="new-password"
+            [class.invalid]="form.get('confirm')?.invalid && form.get('confirm')?.touched" />
+          <small *ngIf="form.get('confirm')?.invalid && form.get('confirm')?.touched">Confirm your password.</small>
+          <div *ngIf="showPasswordMatchStatus" class="password-match-indicator">
+            <span *ngIf="passwordsMatch === true" class="match-success">✓ Passwords match</span>
+            <span *ngIf="passwordsMatch === false" class="match-error">✗ Passwords do not match</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="password-toggle-row">
+        <label class="show-password">
+          <input 
+            type="checkbox" 
+            [checked]="showPassword()"
+            (change)="togglePassword()" />
+          <span>Show password</span>
+        </label>
+      </div>
+
+      <div class="row cta">
+        <div></div>
+        <button type="submit" [disabled]="form.invalid || isLoading()">
+          {{ isLoading() ? 'Registering…' : 'Create account' }}
+        </button>
+      </div>
+
+      <p *ngIf="registerError()" class="error">{{ registerError() }}</p>
+
+      <div class="links">
+        <span>Already have an account?</span>
+        <a routerLink="/login">Log in</a>
+      </div>
+    </form>
+  </div>
+</section>

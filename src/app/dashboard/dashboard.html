@@ -1,4 +1,14 @@
-<app-navbar></app-navbar>
+<header class="top-bar">
+  <h1>Workout App Dashboard</h1>
+  <div class="top-actions">
+    <button class="profile-btn" (click)="goToProfile()">
+      <div class="profile-main">{{ user()?.displayName || 'Profile' }}</div>
+      <div class="profile-sub" *ngIf="user()?.email">{{ user()?.email }}</div>
+    </button>
+    <button class="logout-btn" (click)="logout()">Logout</button>
+  </div>
+</header>
+
 <main class="dashboard-content">
   <p>Dashboard works!</p>
 
