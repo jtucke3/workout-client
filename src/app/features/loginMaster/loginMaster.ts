@@ -2,11 +2,12 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
+import { Login } from './loginComponent/login';
 import { TwoFaComponent } from './two-fa-component/two-fa-component';
 @Component({
   standalone: true,
   selector: 'app-login-master',
-  imports: [CommonModule, TwoFaComponent],
+  imports: [CommonModule, Login, TwoFaComponent],
   templateUrl: './loginMaster.html',
   styleUrls: ['./loginMaster.scss']
 })
