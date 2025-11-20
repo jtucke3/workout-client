@@ -10,8 +10,7 @@ export const routes: Routes = [
   { path: 'friends', canActivate: [authGuard], loadComponent: () => import('./features/friends/friends').then(m => m.Friends) },
   { path: 'goals', canActivate: [authGuard], loadComponent: () => import('./features/goals/goals').then(m => m.Goals) },
   { path: 'profile', canActivate: [authGuard], loadComponent: () => import('./features/profile/profile').then(m => m.Profile) },
-    { path: 'register', loadComponent: () => import('./features/register/register').then(m => m.Register) },
-
+  { path: 'register', loadComponent: () => import('./features/register/register').then(m => m.Register) },
   { path: 'forgot-password', loadComponent: () => import('./features/forgot-password/forgot-password').then(m => m.ForgotPassword) },
   { path: 'workouts', canActivate: [authGuard], loadComponent: () => import('./features/workouts/workouts').then(m => m.Workouts) },
   { path: '**', redirectTo: 'login' }
