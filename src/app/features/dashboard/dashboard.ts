@@ -1,8 +1,8 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { UnitService } from '../services/unit.service';
-import { Navbar } from '../navbar/navbar';
+import { UnitService } from '../shared/services/unit.service';
+import { Navbar } from '../shared/components/navbar/navbar';
 
 @Component({
   selector: 'app-dashboard',

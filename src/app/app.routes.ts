@@ -7,6 +7,6 @@ export const routes: Routes = [
   { path: 'register', loadComponent: () => import('./register/register').then(m => m.Register) },
   { path: 'forgot-password', loadComponent: () => import('./forgot-password/forgot-password').then(m => m.ForgotPassword) },
   { path: 'dashboard', loadComponent: () => import('./dashboard/dashboard').then(m => m.Dashboard) },
-  { path: 'profile', loadComponent: () => import('./profile/profile').then(m => m.Profile) },
+  { path: 'profile', loadComponent: () => import('./features/profile/profile').then(m => m.Profile) },
   { path: '**', redirectTo: 'login' }
 ];
