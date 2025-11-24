@@ -1,102 +1,152 @@
-.top-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background: rgba(30, 41, 59, 0.95);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 1rem;
-  height: 60px;
-  box-sizing: border-box; /* important to include padding in width */
-  z-index: 1000;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+/* Wider layout but still centered */
+.dashboard-wrapper {
+  padding-top: 70px;
+  padding-bottom: 40px;
+  width: min(1200px, 95%);
+  margin: auto;
+  display: grid;
+  gap: 2rem;
+}
 
-  h1 {
+/* Welcome card remains at the top */
+.welcome-card {
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  padding: 2.2rem;
+  border-radius: 18px;
+  backdrop-filter: blur(6px);
+  text-align: center;
+  color: #e5e7eb;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+
+  h2 {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 2rem;
     font-weight: 800;
-    color: #ffffff;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    flex-shrink: 1; /* allows shrinking on small screens */
   }
-
-  .logout-btn {
-    height: 36px;
-    padding: 0 1rem;
-    border: none;
-    border-radius: 10px;
-    background: #3b82f6;
-    color: #fff;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.04s;
-    white-space: nowrap;
-    flex-shrink: 0; /* prevent shrinking */
-    margin-left: 1rem;
-
-    &:hover { background: #2563eb; }
-    &:active { transform: translateY(1px); }
+  p {
+    margin-top: .4rem;
+    color: #93a0b7;
   }
+}
 
-  .top-actions {
-    display: flex;
-    align-items: center;
-  }
+/* Core layout cards */
+.section-card {
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 18px;
+  padding: 2rem 2.2rem;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+  color: #e5e7eb;
+  display: grid;
+  gap: 1.2rem;
 
-  .profile-btn {
-    height: 36px;
-    padding: 0 1rem;
-    border: none;
-    border-radius: 10px;
-    background: transparent;
-    color: #cbd5e1;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s, transform 0.04s;
-    white-space: nowrap;
-    flex-shrink: 0;
-    margin-right: 0.5rem;
-
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-
-    .profile-main { font-weight: 800; color: #ffffff; }
-    .profile-sub { font-size: 0.75rem; color: #cbd5e1; opacity: 0.9; }
-
-    &:hover {
-      background: rgba(255,255,255,0.04);
-      color: #ffffff;
+  .section-header {
+    h3 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
     }
-    &:active { transform: translateY(1px); }
-  }
-
-  /* For very small screens */
-  @media (max-width: 480px) {
-    flex-direction: column;
-    height: auto;
-    padding: 0.5rem 1rem;
-    align-items: stretch;
-
-    h1 {
-      margin-bottom: 0.5rem;
-      text-align: center;
-    }
-
-    .logout-btn {
-      width: 100%; /* button fills width below title */
-      margin-left: 0;
+    p {
+      margin-top: .3rem;
+      color: #93a0b7;
     }
   }
 }
 
-.dashboard-content {
-  padding-top: 60px;
-  margin: 10px;
+/* Blue button matches login theme */
+.blue-btn {
+  height: 44px;
+  padding: 0 1.4rem;
+  border-radius: 10px;
+  border: none;
+  background: #3b82f6;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+  justify-self: start;
+  transition: background .2s, transform .05s;
+
+  &:hover { background: #2563eb; }
+  &:active { transform: translateY(1px); }
+}
+
+/* ===== Calories Bar ===== */
+.calorie-bar, .goal-bar {
+  width: 100%;
+  height: 14px;
+  background: #1e293b;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(148,163,184,0.15);
+}
+
+.calorie-fill {
+  height: 100%;
+  background: #3b82f6;
+  transition: width .3s;
+}
+
+.goal-fill {
+  height: 100%;
+  background: #10b981;
+  transition: width .3s;
+}
+
+.calorie-info {
+  margin: 0;
+  font-size: .85rem;
+  color: #9fb1cf;
+}
+
+/* ===== MORE TABLE-LIKE FRIENDS TABLE ===== */
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(15, 23, 42, 0.35);
+  box-shadow:
+    inset 0 0 12px rgba(0,0,0,0.25),
+    0 8px 24px rgba(0,0,0,0.35);
+}
+
+.friends-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  color: #e2e8f0;
+
+  thead {
+    background: rgba(255, 255, 255, 0.07);
+  }
+
+  th {
+    padding: 0.85rem 1rem;
+    text-align: left;
+    font-weight: 700;
+    color: #f1f5f9;
+    font-size: 0.95rem;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+  }
+
+  td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+    white-space: nowrap;
+  }
+
+  /* Zebra striping for readability */
+  tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  /* Row hover effect */
+  tbody tr:hover {
+    background: rgba(255, 255, 255, 0.06);
+    transition: background 0.2s ease;
+  }
 }

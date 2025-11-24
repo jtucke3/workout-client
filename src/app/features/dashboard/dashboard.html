@@ -1,9 +1,91 @@
 <app-navbar></app-navbar>
 
-<main class="dashboard-content">
-  <p>Dashboard works!</p>
+<main class="dashboard-wrapper">
 
-  <div class="weight-display">
-    <p>Current weight: {{ displayedWeight | number:'1.0-1' }} {{ weightSymbol }}</p>
+  <div class="welcome-card">
+    <h2>Welcome back, {{ user()?.displayName || 'User' }} 👋</h2>
+    <p>Your fitness journey continues today.</p>
   </div>
+
+  <!-- SECTION: Start Workout -->
+  <section class="section-card">
+    <div class="section-header">
+      <h3>Start a Workout</h3>
+      <p>Ready to train? Begin a new workout session.</p>
+    </div>
+
+    <button class="blue-btn" routerLink="/workout-start">
+      Start Workout
+    </button>
+  </section>
+
+  <!-- SECTION: Meals + Calories -->
+  <section class="section-card">
+    <div class="section-header">
+      <h3>Your Meals</h3>
+      <p>Last recorded meal: {{ lastMealName || 'None yet' }}</p>
+    </div>
+
+    <!-- Calorie bar -->
+    <div class="calorie-bar">
+      <div class="calorie-fill" [style.width.%]="caloriesPercent || 0"></div>
+    </div>
+    <p class="calorie-info">
+      {{ caloriesConsumed || 0 }} / {{ calorieGoal || 2000 }} kcal
+    </p>
+
+    <button class="blue-btn" routerLink="/meals">
+      Add Meal
+    </button>
+  </section>
+
+  <!-- SECTION: Friends Table -->
+  <section class="section-card">
+  <div class="section-header">
+    <h3>Friends Activity</h3>
+    <p>Latest workouts from your friends</p>
+  </div>
+
+  <div class="table-container">
+    <table class="friends-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Workout</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let f of friends">
+          <td>{{ f.name }}</td>
+          <td>{{ f.workout }}</td>
+          <td>{{ f.date | date:'short' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <button class="blue-btn" routerLink="/friends">
+    View All Activity
+  </button>
+</section>
+
+
+  <!-- SECTION: Goal Progress -->
+  <section class="section-card">
+    <div class="section-header">
+      <h3>Your Goal Progress</h3>
+      <p>{{ goalTitle || 'Progress toward your goal' }}</p>
+    </div>
+
+    <div class="goal-bar">
+      <div class="goal-fill" [style.width.%]="goalPercent || 0"></div>
+    </div>
+
+    <button class="blue-btn" routerLink="/goals">
+      View Goal
+    </button>
+  </section>
+
 </main>
