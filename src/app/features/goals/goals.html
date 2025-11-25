@@ -1,3 +1,220 @@
 <app-navbar></app-navbar>
 
-<p>goals works!</p>
+<main class="goals-content">
+  <div class="goals-header">
+    <h1>🎯 My Goals</h1>
+    <div class="header-actions">
+      <div class="filter-tabs">
+        <button 
+          *ngFor="let filter of ['all', 'active', 'completed', 'paused']" 
+          class="filter-tab"
+          [class.active]="selectedFilter() === filter"
+          (click)="setFilter(filter)">
+          {{ filter | titlecase }}
+          <span class="count">({{ getFilterCount(filter) }})</span>
+        </button>
+      </div>
+      <button class="create-btn" (click)="openCreateForm()">
+        ➕ Add Goal
+      </button>
+    </div>
+  </div>
+
+  <!-- Goal Creation/Edit Form -->
+  <div class="form-overlay" *ngIf="showCreateForm()" (click)="closeCreateForm()">
+    <div class="goal-form-card" (click)="$event.stopPropagation()">
+      <h2>{{ editingGoal() ? 'Edit Goal' : 'Create New Goal' }}</h2>
+      
+      <form [formGroup]="goalForm" (ngSubmit)="saveGoal()" class="goal-form">
+        <div class="form-row">
+          <div class="field">
+            <label for="title">Goal Title *</label>
+            <input 
+              id="title" 
+              type="text" 
+              formControlName="title" 
+              placeholder="e.g., Lose 20 pounds"
+              [class.invalid]="goalForm.get('title')?.invalid && goalForm.get('title')?.touched" />
+            <small *ngIf="goalForm.get('title')?.invalid && goalForm.get('title')?.touched">
+              Title is required (max 100 characters)
+            </small>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label for="type">Goal Type *</label>
+            <select id="type" formControlName="type" (change)="onGoalTypeChange()">
+              <option *ngFor="let type of goalTypes" [value]="type.value">
+                {{ type.icon }} {{ type.label }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label for="description">Description</label>
+            <textarea 
+              id="description" 
+              formControlName="description" 
+              placeholder="Optional description of your goal"
+              rows="3"></textarea>
+          </div>
+        </div>
+
+        <div class="form-row two-col">
+          <div class="field">
+            <label for="currentValue">
+              {{ isWeightGoal ? 'Current Weight' : 'Current Value' }} *
+              <span *ngIf="isLoadingWeight()" class="loading-indicator">Loading...</span>
+            </label>
+            <input 
+              id="currentValue" 
+              type="number" 
+              formControlName="currentValue" 
+              [placeholder]="isWeightGoal ? 'Your current weight' : '0'"
+              step="0.1"
+              [readonly]="isLoadingWeight()" />
+            <small *ngIf="isWeightGoal && currentWeightFromBackend()" class="weight-info">
+              Loaded from your profile: {{ currentWeightFromBackend() }} {{ preferredWeightUnit }}
+            </small>
+          </div>
+          <div class="field">
+            <label for="targetValue">
+              {{ isWeightGoal ? 'Target Weight' : 'Target Value' }}
+            </label>
+            <input 
+              id="targetValue" 
+              type="number" 
+              formControlName="targetValue" 
+              [placeholder]="isWeightGoal ? 'Your goal weight' : 'e.g., 200'"
+              step="0.1" />
+          </div>
+        </div>
+
+        <div class="form-row two-col">
+          <div class="field">
+            <label for="unit">Unit</label>
+            <select 
+              *ngIf="isWeightGoal; else unitInput"
+              id="unit" 
+              formControlName="unit"
+              class="unit-dropdown">
+              <option value="lbs">lbs (Pounds)</option>
+              <option value="kg">kg (Kilograms)</option>
+            </select>
+            <ng-template #unitInput>
+              <input 
+                id="unit" 
+                type="text" 
+                formControlName="unit" 
+                placeholder="e.g., lbs, reps, minutes" />
+            </ng-template>
+          </div>
+          <div class="field">
+            <label for="targetDate">Target Date *</label>
+            <input 
+              id="targetDate" 
+              type="date" 
+              formControlName="targetDate" />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="cancel-btn" (click)="closeCreateForm()">Cancel</button>
+          <button type="submit" class="save-btn" [disabled]="goalForm.invalid">
+            {{ editingGoal() ? 'Update Goal' : 'Create Goal' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Goals Grid -->
+  <div class="goals-grid" *ngIf="filteredGoals.length > 0">
+    <div class="goal-card" *ngFor="let goal of filteredGoals" [class]="goal.status">
+      <div class="goal-header">
+        <div class="goal-type-badge">
+          {{ getTypeIcon(goal.type) }} {{ getTypeLabel(goal.type) }}
+        </div>
+        <div class="goal-actions">
+          <button class="action-btn edit" (click)="editGoal(goal)" title="Edit goal">
+            ✏️
+          </button>
+          <button 
+            class="action-btn toggle" 
+            (click)="toggleGoalStatus(goal)" 
+            [title]="goal.status === 'active' ? 'Pause goal' : 'Resume goal'">
+            {{ goal.status === 'active' ? '⏸️' : '▶️' }}
+          </button>
+          <button class="action-btn delete" (click)="deleteGoal(goal.id)" title="Delete goal">
+            🗑️
+          </button>
+        </div>
+      </div>
+
+      <h3 class="goal-title">{{ goal.title }}</h3>
+      <p class="goal-description" *ngIf="goal.description">{{ goal.description }}</p>
+
+      <div class="goal-progress">
+        <div class="progress-header">
+          <span class="progress-text">
+            {{ goal.currentValue }}
+            <span *ngIf="goal.targetValue"> / {{ goal.targetValue }}</span>
+            <span *ngIf="goal.unit"> {{ goal.unit }}</span>
+          </span>
+          <span class="progress-percentage" [style.color]="getProgressColor(goal.progress)">
+            {{ goal.progress | number:'1.0-1' }}%
+          </span>
+        </div>
+        <div class="progress-bar">
+          <div 
+            class="progress-fill" 
+            [style.width.%]="goal.progress"
+            [style.background-color]="getProgressColor(goal.progress)"></div>
+        </div>
+      </div>
+
+      <div class="goal-details">
+        <div class="detail-item">
+          <span class="label">Target Date:</span>
+          <span class="value">{{ goal.targetDate | date:'mediumDate' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Days Left:</span>
+          <span class="value" [class.urgent]="getDaysUntilTarget(goal.targetDate) < 30">
+            {{ getDaysUntilTarget(goal.targetDate) }} days
+          </span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Status:</span>
+          <span class="value status" [class]="goal.status">{{ goal.status | titlecase }}</span>
+        </div>
+      </div>
+
+      <div class="quick-update" *ngIf="goal.status === 'active'">
+        <label>Quick Update Progress:</label>
+        <div class="update-controls">
+          <input 
+            type="number" 
+            [value]="goal.currentValue" 
+            (blur)="updateGoalProgress(goal, $event.target && $event.target.value ? +$event.target.value : goal.currentValue)"
+            step="0.1"
+            class="quick-input" />
+          <span *ngIf="goal.unit">{{ goal.unit }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="filteredGoals.length === 0">
+    <div class="empty-icon">🎯</div>
+    <h2>No Goals Yet</h2>
+    <p>Start tracking your fitness journey by creating your first goal!</p>
+    <button class="create-btn" (click)="openCreateForm()">
+      ➕ Create Your First Goal
+    </button>
+  </div>
+</main>

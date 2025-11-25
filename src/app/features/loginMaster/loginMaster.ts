@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
-import { Login } from './loginComponent/login';
+import { Login } from './login/login';
 import { TwoFaComponent } from './two-fa-component/two-fa-component';
 @Component({
   standalone: true,
