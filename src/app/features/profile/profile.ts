@@ -105,8 +105,4 @@ export class Profile implements OnInit {
   onChangeUsername() {
     console.log('Change username clicked');
   }
-
-  goBack() {
-    this.router.navigateByUrl('/dashboard');
-  }
 }

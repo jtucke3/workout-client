@@ -1,68 +1,79 @@
-.profile-content {
-  padding-top: 60px;
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
-  padding-bottom: 1.5rem;
+.profile-wrapper {
+  padding-top: 70px;
+  padding-bottom: 40px;
+  width: min(1200px, 95%);
+  margin: auto;
+  display: grid;
+  justify-items: center;
 }
 
-.profile-header {
-  position: sticky;
-  top: 0;
-  background: rgba(30,41,59,0.95);
-  color: #fff;
-  display: flex;
+.profile-card {
+  width: 100%;
+  max-width: 840px; /* wider to match other pages */
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 18px;
+  padding: 2.2rem;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  display: grid;
+  gap: 2rem; /* more gap between rows */
+  color: #e5e7eb;
+
+  h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 800;
+    text-align: center;
+    color: #ffffff;
+  }
+}
+
+.profile-field {
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
   align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid rgba(148,163,184,0.08);
-}
+  gap: 1rem;
+  margin-bottom: 1.5rem; /* extra spacing between fields */
 
-.back-btn {
-  height: 36px;
-  padding: 0 1rem;
-  border: none;
-  border-radius: 8px;
-  background: #3b82f6;
-  color: white;
-  font-weight: 700;
-  cursor: pointer;
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .field-label {
+    font-weight: 700;
+    color: #94a3b8;
+  }
+
+  .field-value {
+    padding: 0.6rem 0.9rem;
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.6);
+    color: #e5e7eb;
+  }
+
+  .blue-btn {
+    height: 40px;
+    padding: 0 1rem;
+    border-radius: 10px;
+    border: none;
+    background: #3b82f6;
+    color: #ffffff;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.05s;
+
+    &:hover { background: #2563eb; }
+    &:active { transform: translateY(1px); }
+  }
 }
 
 .error {
-  color: #fecaca; /* light red */
-  background: rgba(255, 0, 0, 0.03);
-  padding: 0.5rem 0.75rem;
-  border-radius: 6px;
-}
-
-.field-row {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
-}
-
-.field-label {
-  min-width: 90px;
-  font-weight: 700;
-  color: #94a3b8;
-}
-
-.field-value {
-  flex: 1 1 auto;
-  padding: 0.5rem 0.75rem;
-  background: #f8fafc;
-  border-radius: 6px;
-  color: #0f172a;
-}
-
-.change-btn {
-  height: 34px;
-  padding: 0 0.75rem;
-  border-radius: 8px;
-  border: none;
-  background: transparent;
-  color: #2563eb;
-  font-weight: 700;
-  cursor: pointer;
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.1);
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  font-weight: 600;
+  text-align: center;
 }

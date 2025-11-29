@@ -2,15 +2,16 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { UnitService } from '../../shared/services/unit.service';
+import { Navbar } from '../../shared/components/navbar/navbar';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule],
+  imports: [CommonModule, Navbar, RouterModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
 export class Dashboard {
-  private router = inject(Router);
   private unitService = inject(UnitService);
   isLoading = signal(true);
   user = signal<{ displayName?: string; email?: string } | null>(null);
@@ -22,30 +23,6 @@ export class Dashboard {
     } else {
       this.isLoading.set(false);
     }
-  }
-
-  // Example stored weight for testing
-  weightInPounds = 100;
-
-  // Displayed weight after conversion
-  get displayedWeight(): number {
-    const preferred = this.unitService.getPreferredUnit();
-    return this.unitService.convertWeight(this.weightInPounds, 'POUNDS', preferred);
-  }
-
-  // Get unit symbol (lbs / kg)
-  get weightSymbol(): string {
-    return this.unitService.getSymbol();
-  }
-
-  logout() {
-    localStorage.removeItem('token');
-    fetch('/api/auth/logout', { method: 'POST' });
-    window.location.href = '/login';
-}
-
-  goToProfile() {
-    this.router.navigateByUrl('/profile');
   }
 
   private async loadUser() {
@@ -72,4 +49,38 @@ export class Dashboard {
       this.isLoading.set(false);
     }
   }
+
+  // Example stored weight for testing
+  weightInPounds = 100;
+
+  // Displayed weight after conversion
+  get displayedWeight(): number {
+    const preferred = this.unitService.getPreferredUnit();
+    return this.unitService.convertWeight(this.weightInPounds, 'POUNDS', preferred);
+  }
+
+  // Get unit symbol (lbs / kg)
+  get weightSymbol(): string {
+    return this.unitService.getSymbol();
+  }
+
+  friends = [
+    { name: "John Doe", workout: "Chest Day – 45 min", date: new Date() },
+    { name: "Sarah Lee", workout: "5 Mile Run", date: new Date(Date.now() - 3600_000) },
+    { name: "Miguel Torres", workout: "Leg Day – 60 min", date: new Date(Date.now() - 7200_000) },
+  ];
+
+  //lastMealName = null; // placeholder
+  get lastMealName(): string {
+    return "Chicken Salad";
+  }
+  caloriesConsumed = 1200;
+  calorieGoal = 2000;
+  get caloriesPercent(): number {
+    return (this.caloriesConsumed / this.calorieGoal) * 100;
+  }
+
+  goalTitle = "Lose 5 lbs";
+  goalPercent = 40;
+
 }

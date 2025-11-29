@@ -1,3 +1,49 @@
 <app-navbar></app-navbar>
 
-<p>meals works!</p>
+<main class="meals-wrapper">
+  <!-- Calorie Tracking Bar -->
+  <section class="calorie-card">
+    <h2>Calories Today</h2>
+    <div class="calorie-bar">
+      <div class="calorie-fill" [style.width.%]="caloriesPercent"></div>
+    </div>
+    <p class="calorie-info">{{ caloriesConsumed() }} / {{ calorieGoal }} kcal</p>
+  </section>
+
+  <!-- Meals List -->
+  <section class="meals-card">
+    <h2>Your Meals</h2>
+    <div *ngIf="meals().length === 0" class="no-meals">No meals added yet.</div>
+
+    <div *ngFor="let meal of meals(); let i = index" class="meal-row">
+      <div class="meal-info">
+        <div class="meal-name">{{ meal.name }}</div>
+        <div class="meal-time">{{ meal.time | date:'shortTime' }}</div>
+        <div class="meal-calories">{{ meal.calories }} kcal</div>
+      </div>
+      <div class="meal-actions">
+        <button class="edit-btn" (click)="editMeal(i)">Edit/View</button>
+        <button class="delete-btn" (click)="deleteMeal(i)">Delete</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Floating Add Meal Button -->
+  <button class="add-meal-btn" (click)="showAddMeal.set(true)">Add Meal</button>
+
+  <!-- Add/Edit Meal Modal -->
+  <div class="modal-backdrop" *ngIf="showAddMeal()">
+    <div class="modal-card">
+      <h3>{{ editingIndex !== null ? 'Edit Meal' : 'Add a Meal' }}</h3>
+      <input type="text" placeholder="Meal Name" [(ngModel)]="newMealName" />
+      <input type="number" placeholder="Calories" [(ngModel)]="newMealCalories" />
+      <textarea placeholder="Notes (optional)" [(ngModel)]="newMealNotes"></textarea>
+      <div class="modal-actions">
+        <button class="blue-btn" (click)="saveMeal()">
+          {{ editingIndex !== null ? 'Save Changes' : 'Add' }}
+        </button>
+        <button class="cancel-btn" (click)="cancelMeal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</main>
