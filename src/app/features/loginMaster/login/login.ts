@@ -4,7 +4,6 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { LoginService } from '../loginService/login.service';
 import { LoginRequestWebVo } from '../loginModels/login-api.models';
-import { RouterModule } from '@angular/router';
 
 @Component({
   standalone: true,
