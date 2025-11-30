@@ -1,9 +1,16 @@
 <app-navbar></app-navbar>
 
 <main class="profile-wrapper">
-  <div class="profile-card">
-    <h1>My Profile</h1>
+  <section class="profile-header">
+    <div class="profile-title-row">
+      <div class="profile-title-text">
+        <h1>My Profile</h1>
+        <p class="profile-subtitle">Manage your account details and security.</p>
+      </div>
+    </div>
+  </section>
 
+  <section class="profile-card">
     <div *ngIf="isLoading()">
       <p>Loading profile...</p>
     </div>
@@ -12,18 +19,27 @@
       <p>{{ error() }}</p>
     </div>
 
-    <div *ngIf="!isLoading() && profile() as p">
+    <div *ngIf="!isLoading() && profile() as p" class="profile-grid">
       <div class="profile-field">
         <div class="field-label">Email</div>
         <div class="field-value">{{ p.email || 'Not available' }}</div>
-        <button class="blue-btn" (click)="onChangeEmail()">Change</button>
       </div>
 
       <div class="profile-field">
-        <div class="field-label">Username</div>
+        <div class="field-label">Name</div>
         <div class="field-value">{{ p.username || 'Not available' }}</div>
-        <button class="blue-btn" (click)="onChangeUsername()">Change</button>
+        <button type="button" class="pill-button pill-secondary name-button">Change Name</button>
       </div>
     </div>
-  </div>
+  </section>
+
+  <section class="profile-card security-card">
+    <h2 class="card-title">Account Security</h2>
+    <p class="card-subtitle">Keep your account protected with strong security settings.</p>
+
+    <div class="security-actions">
+      <button type="button" class="pill-button pill-primary">Change Password</button>
+      <button type="button" class="pill-button pill-secondary">Manage 2FA</button>
+    </div>
+  </section>
 </main>
