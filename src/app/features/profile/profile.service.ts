@@ -18,11 +18,24 @@ export class ProfileService {
       (typeof window !== 'undefined' && (localStorage.getItem('token') || sessionStorage.getItem('token')))
         || null;
 
-    const headers: HttpHeaders = new HttpHeaders({
+    const userId =
+      (typeof window !== 'undefined' && (localStorage.getItem('userId') || sessionStorage.getItem('userId')))
+        || null;
+
+    const headersInit: Record<string, string> = {
       'Content-Type': 'application/json',
       Accept: 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {})
-    });
+    };
+
+    if (token) {
+      headersInit['Authorization'] = `Bearer ${token}`;
+    }
+
+    if (userId) {
+      headersInit['X-User-Id'] = userId;
+    }
+
+    const headers: HttpHeaders = new HttpHeaders(headersInit);
 
     const body = {
       currentPassword,
