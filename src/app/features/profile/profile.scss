@@ -147,25 +147,60 @@
     background: rgba(15, 23, 42, 0.6);
     color: #e5e7eb;
   }
-
+}
 
 .name-button {
   white-space: nowrap;
 }
-  .blue-btn {
-    height: 40px;
-    padding: 0 1rem;
-    border-radius: 10px;
-    border: none;
-    background: #3b82f6;
-    color: #ffffff;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.05s;
 
-    &:hover { background: #2563eb; }
-    &:active { transform: translateY(1px); }
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 40;
+}
+
+.modal-card {
+  width: min(420px, 90vw);
+  background: rgba(15, 23, 42, 0.98);
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.6);
+  padding: 1.4rem 1.5rem 1.6rem;
+}
+
+.modal-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  background: rgba(15, 23, 42, 0.95);
+  color: #e5e7eb;
+  font-size: 0.95rem;
+  outline: none;
+
+  &:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 1px #3b82f6;
   }
+}
+
+.modal-actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
 }
 
 .error {

@@ -23,6 +23,7 @@ export class Profile implements OnInit {
   isLoading = signal(true);
   error = signal<string | null>(null);
   profile = signal<UserProfile | null>(null);
+  showNameModal = false;
 
   ngOnInit() {
     // Only run profile loading in the browser. localStorage / window are not available during SSR.
@@ -98,11 +99,29 @@ export class Profile implements OnInit {
     }
   }
 
-  onChangeEmail() {
-    console.log('Change email clicked');
+  openNameModal() {
+    this.showNameModal = true;
   }
 
-  onChangeUsername() {
-    console.log('Change username clicked');
+  closeNameModal() {
+    this.showNameModal = false;
+  }
+
+  submitNameChange(newName: string) {
+    const trimmed = newName?.trim();
+    if (!trimmed) {
+      this.closeNameModal();
+      return;
+    }
+
+    const current = this.profile();
+    const updated = {
+      ...(current || {}),
+      username: trimmed
+    };
+
+    this.profile.set(updated);
+    try { localStorage.setItem('user', JSON.stringify(updated)); } catch {}
+    this.closeNameModal();
   }
 }
