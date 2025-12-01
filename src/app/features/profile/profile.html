@@ -1,9 +1,16 @@
 <app-navbar></app-navbar>
 
 <main class="profile-wrapper">
-  <div class="profile-card">
-    <h1>My Profile</h1>
+  <section class="profile-header">
+    <div class="profile-title-row">
+      <div class="profile-title-text">
+        <h1>My Profile</h1>
+        <p class="profile-subtitle">Manage your account details and security.</p>
+      </div>
+    </div>
+  </section>
 
+  <section class="profile-card">
     <div *ngIf="isLoading()">
       <p>Loading profile...</p>
     </div>
@@ -12,18 +19,85 @@
       <p>{{ error() }}</p>
     </div>
 
-    <div *ngIf="!isLoading() && profile() as p">
+    <div *ngIf="!isLoading() && profile() as p" class="profile-grid">
       <div class="profile-field">
         <div class="field-label">Email</div>
         <div class="field-value">{{ p.email || 'Not available' }}</div>
-        <button class="blue-btn" (click)="onChangeEmail()">Change</button>
       </div>
 
       <div class="profile-field">
-        <div class="field-label">Username</div>
+        <div class="field-label">Name</div>
         <div class="field-value">{{ p.username || 'Not available' }}</div>
-        <button class="blue-btn" (click)="onChangeUsername()">Change</button>
+        <button type="button" class="pill-button pill-secondary name-button" (click)="openNameModal()">Change Name</button>
       </div>
+    </div>
+  </section>
+
+  <section class="profile-card security-card">
+    <h2 class="card-title">Account Security</h2>
+    <p class="card-subtitle">Keep your account protected with strong security settings.</p>
+
+    <div class="security-actions">
+      <button type="button" class="pill-button pill-primary" (click)="openPasswordModal()">Change Password</button>
+      <button type="button" class="pill-button pill-secondary">Manage 2FA</button>
+    </div>
+  </section>
+
+  <!-- Change Name Modal -->
+  <div class="modal-backdrop" *ngIf="showNameModal">
+    <div class="modal-card">
+      <h2 class="card-title">Change Name</h2>
+      <p class="card-subtitle">Update how your name appears across the app.</p>
+
+      <form (ngSubmit)="submitNameChange(nameInput.value)">
+        <label class="modal-label" for="name-input">Name</label>
+        <input
+          #nameInput
+          id="name-input"
+          type="text"
+          class="modal-input"
+          [value]="profile()?.username || ''"
+          autocomplete="name"
+        />
+
+        <div class="modal-actions">
+          <button type="button" class="pill-button pill-secondary" (click)="closeNameModal()">Cancel</button>
+          <button type="submit" class="pill-button pill-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Change Password Modal -->
+  <div class="modal-backdrop" *ngIf="showPasswordModal">
+    <div class="modal-card">
+      <h2 class="card-title">Change Password</h2>
+      <p class="card-subtitle">Set a new password for your account.</p>
+
+      <form (ngSubmit)="submitPasswordChange(currentPassword.value, newPassword.value)">
+        <label class="modal-label" for="current-password-input">Current Password</label>
+        <input
+          #currentPassword
+          id="current-password-input"
+          type="password"
+          class="modal-input"
+          autocomplete="current-password"
+        />
+
+        <label class="modal-label" for="password-input">New Password</label>
+        <input
+          #newPassword
+          id="password-input"
+          type="password"
+          class="modal-input"
+          autocomplete="new-password"
+        />
+
+        <div class="modal-actions">
+          <button type="button" class="pill-button pill-secondary" (click)="closePasswordModal()">Cancel</button>
+          <button type="submit" class="pill-button pill-primary">Save</button>
+        </div>
+      </form>
     </div>
   </div>
 </main>

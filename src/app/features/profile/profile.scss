@@ -1,40 +1,135 @@
 .profile-wrapper {
-  padding-top: 70px;
-  padding-bottom: 40px;
-  width: min(1200px, 95%);
+  padding-top: 32px;
+  padding-bottom: 32px;
+  width: min(1280px, 96%);
   margin: auto;
-  display: grid;
-  justify-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.profile-title-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.profile-title-text {
+  h1 {
+    margin: 0;
+    font-size: 2.1rem;
+    font-weight: 800;
+    color: #ffffff;
+  }
+
+  .profile-subtitle {
+    margin: 0.35rem 0 0;
+    font-size: 0.95rem;
+    color: #9ca3af;
+  }
+}
+
+.profile-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.pill-button {
+  border-radius: 999px;
+  border: none;
+  padding: 0.5rem 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: background 0.18s ease, transform 0.05s ease, box-shadow 0.18s ease;
+}
+
+.pill-primary {
+  background: #3b82f6;
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+
+  &:hover {
+    background: #2563eb;
+  }
+
+  &:active {
+    transform: translateY(1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.5);
+  }
+}
+
+.pill-secondary {
+  background: rgba(15, 23, 42, 0.95);
+  color: #e5e7eb;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+
+  &:hover {
+    background: rgba(15, 23, 42, 1);
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
 }
 
 .profile-card {
   width: 100%;
-  max-width: 840px; /* wider to match other pages */
-  background: rgba(30, 41, 59, 0.9);
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(15, 23, 42, 0.95);
   border-radius: 18px;
-  padding: 2.2rem;
-  backdrop-filter: blur(6px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  padding: 1.4rem 1.6rem 1.6rem;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
   display: grid;
-  gap: 2rem; /* more gap between rows */
+  gap: 1.1rem;
   color: #e5e7eb;
+}
 
-  h1 {
-    margin: 0;
-    font-size: 2rem;
-    font-weight: 800;
-    text-align: center;
-    color: #ffffff;
-  }
+.security-card {
+  margin-top: 0.25rem;
+}
+
+.card-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.card-subtitle {
+  margin: 0 0 0.9rem;
+  font-size: 0.9rem;
+  color: #9ca3af;
+}
+
+.security-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.profile-grid {
+  display: grid;
+  gap: 0.85rem;
 }
 
 .profile-field {
   display: grid;
-  grid-template-columns: 120px 1fr auto;
+  grid-template-columns: 110px 1fr auto;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem; /* extra spacing between fields */
+  gap: 0.75rem;
+  margin-bottom: 0;
 
   @media (max-width: 700px) {
     grid-template-columns: 1fr;
@@ -52,21 +147,60 @@
     background: rgba(15, 23, 42, 0.6);
     color: #e5e7eb;
   }
+}
 
-  .blue-btn {
-    height: 40px;
-    padding: 0 1rem;
-    border-radius: 10px;
-    border: none;
-    background: #3b82f6;
-    color: #ffffff;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.05s;
+.name-button {
+  white-space: nowrap;
+}
 
-    &:hover { background: #2563eb; }
-    &:active { transform: translateY(1px); }
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 40;
+}
+
+.modal-card {
+  width: min(420px, 90vw);
+  background: rgba(15, 23, 42, 0.98);
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.6);
+  padding: 1.4rem 1.5rem 1.6rem;
+}
+
+.modal-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  background: rgba(15, 23, 42, 0.95);
+  color: #e5e7eb;
+  font-size: 0.95rem;
+  outline: none;
+
+  &:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 1px #3b82f6;
   }
+}
+
+.modal-actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
 }
 
 .error {
