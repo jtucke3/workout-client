@@ -38,7 +38,7 @@
     <p class="card-subtitle">Keep your account protected with strong security settings.</p>
 
     <div class="security-actions">
-      <button type="button" class="pill-button pill-primary">Change Password</button>
+      <button type="button" class="pill-button pill-primary" (click)="openPasswordModal()">Change Password</button>
       <button type="button" class="pill-button pill-secondary">Manage 2FA</button>
     </div>
   </section>
@@ -62,6 +62,39 @@
 
         <div class="modal-actions">
           <button type="button" class="pill-button pill-secondary" (click)="closeNameModal()">Cancel</button>
+          <button type="submit" class="pill-button pill-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Change Password Modal -->
+  <div class="modal-backdrop" *ngIf="showPasswordModal">
+    <div class="modal-card">
+      <h2 class="card-title">Change Password</h2>
+      <p class="card-subtitle">Set a new password for your account.</p>
+
+      <form (ngSubmit)="submitPasswordChange(currentPassword.value, newPassword.value)">
+        <label class="modal-label" for="current-password-input">Current Password</label>
+        <input
+          #currentPassword
+          id="current-password-input"
+          type="password"
+          class="modal-input"
+          autocomplete="current-password"
+        />
+
+        <label class="modal-label" for="password-input">New Password</label>
+        <input
+          #newPassword
+          id="password-input"
+          type="password"
+          class="modal-input"
+          autocomplete="new-password"
+        />
+
+        <div class="modal-actions">
+          <button type="button" class="pill-button pill-secondary" (click)="closePasswordModal()">Cancel</button>
           <button type="submit" class="pill-button pill-primary">Save</button>
         </div>
       </form>

@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Navbar } from '../../shared/components/navbar/navbar';
+import { ProfileService } from './profile.service';
 
 type UserProfile = {
   username?: string;
@@ -19,11 +20,13 @@ type UserProfile = {
 })
 export class Profile implements OnInit {
   private router = inject(Router);
+  private profileService = inject(ProfileService);
 
   isLoading = signal(true);
   error = signal<string | null>(null);
   profile = signal<UserProfile | null>(null);
   showNameModal = false;
+  showPasswordModal = false;
 
   ngOnInit() {
     // Only run profile loading in the browser. localStorage / window are not available during SSR.
@@ -123,5 +126,32 @@ export class Profile implements OnInit {
     this.profile.set(updated);
     try { localStorage.setItem('user', JSON.stringify(updated)); } catch {}
     this.closeNameModal();
+  }
+
+  openPasswordModal() {
+    this.showPasswordModal = true;
+  }
+
+  closePasswordModal() {
+    this.showPasswordModal = false;
+  }
+
+  async submitPasswordChange(currentPassword: string, newPassword: string) {
+    const currentTrimmed = currentPassword?.trim();
+    const newTrimmed = newPassword?.trim();
+
+    if (!currentTrimmed || !newTrimmed) {
+      this.closePasswordModal();
+      return;
+    }
+
+    try {
+      await this.profileService.changePassword(currentTrimmed, newTrimmed);
+      // optionally you could show a toast here; for now just close
+    } catch (e) {
+      console.error('Change password failed', e);
+    } finally {
+      this.closePasswordModal();
+    }
   }
 }
