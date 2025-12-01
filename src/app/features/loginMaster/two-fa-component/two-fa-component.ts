@@ -13,6 +13,8 @@ import {
   Validators
 } from '@angular/forms';
 import { LoginService } from '../loginService/login.service';
+import { QRCodeComponent } from 'angularx-qrcode';
+import { AuthUserService } from '../../../shared/services/auth-user.service';
 
 type TwoFaMode = 'verify' | 'setup';
 type SetupStep = 'recommend' | 'configure';
@@ -20,7 +22,7 @@ type SetupStep = 'recommend' | 'configure';
 @Component({
   standalone: true,
   selector: 'app-two-fa-component',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, QRCodeComponent],
   templateUrl: './two-fa-component.html',
   styleUrls: ['./two-fa-component.scss']
 })
@@ -38,6 +40,7 @@ export class TwoFaComponent {
 
   private fb = inject(FormBuilder);
   private loginService = inject(LoginService);
+  private authUser = inject(AuthUserService);
 
   // Shared bits
   isLoading = signal(false);
@@ -50,6 +53,18 @@ export class TwoFaComponent {
 
   // Setup-mode internal state
   setupStep = signal<SetupStep>('recommend');
+
+  // Setup-mode data coming back from backend
+  setupQrUri = signal<string | null>(null);
+  setupSecret = signal<string | null>(null);
+
+  // Guard rail form inside "configure" step:
+  // - user must enter a 6-digit code from their app
+  // - user must check the confirmation checkbox
+  confirmForm = this.fb.group({
+    confirmCode: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
+    acknowledge: [false, [Validators.requiredTrue]]
+  });
 
   // --- VERIFY FLOW ---
 
@@ -74,8 +89,13 @@ export class TwoFaComponent {
 
       // Store token like a normal login and finish
       if (response.token) {
-        this.loginService.storeToken(response.token, /*remember*/ true);
+        // In your existing app you likely have a "remember me" flag stored elsewhere;
+        // using session as default here
+        this.loginService.storeToken(response.token, true);
       }
+
+      // Make sure current user info is set after verify
+      this.authUser.setUserFromAuthPayload(response);
 
       this.completed.emit();
     } catch (err: any) {
@@ -91,9 +111,39 @@ export class TwoFaComponent {
   // --- SETUP FLOW ---
 
   /** Called when user clicks "Set up 2FA now" on the recommendation view. */
-  startSetup() {
+  async startSetup() {
     if (this.mode !== 'setup') return;
-    this.setupStep.set('configure');
+
+    const currentUser = this.authUser.user();
+    const email = currentUser?.email;
+
+    if (!email) {
+      this.error.set(
+        'You need to be logged in to set up two-factor authentication.'
+      );
+      return;
+    }
+
+    this.isLoading.set(true);
+    this.error.set(null);
+
+    try {
+      const res = await this.loginService.beginTwoFactorSetup(email);
+      this.setupQrUri.set(res.otpauthUri);
+      this.setupSecret.set(this.extractSecret(res.otpauthUri));
+      this.setupStep.set('configure');
+      this.confirmForm.reset({
+        confirmCode: '',
+        acknowledge: false
+      });
+    } catch (err: any) {
+      console.error('2FA setup error', err);
+      this.error.set(
+        err?.message || 'Could not start 2FA setup. Please try again.'
+      );
+    } finally {
+      this.isLoading.set(false);
+    }
   }
 
   /** Called when user clicks "Remind me later". */
@@ -102,15 +152,31 @@ export class TwoFaComponent {
   }
 
   /**
-   * Placeholder "finish setup" — once you add backend endpoints for 2FA setup,
-   * this is where you’d call them. For now, we just treat it as completed.
+   * User confirms they have scanned the QR and set up their authenticator app.
+   * Guard rail: they must enter a 6-digit code and tick the checkbox first.
    */
   completeSetup() {
+    if (this.mode !== 'setup') return;
+
+    if (this.confirmForm.invalid) {
+      this.confirmForm.markAllAsTouched();
+      return;
+    }
+
+    // We don't need the code value on the frontend for now; we just
+    // require the user to have opened their app and read a code.
     this.completed.emit();
   }
 
   backToRecommend() {
     if (this.mode !== 'setup') return;
     this.setupStep.set('recommend');
+  }
+
+  /** Utility: extract ?secret=XYZ from an otpauth:// URI for manual entry. */
+  private extractSecret(uri: string): string | null {
+    if (!uri) return null;
+    const match = uri.match(/secret=([^&]+)/i);
+    return match ? match[1] : null;
   }
 }

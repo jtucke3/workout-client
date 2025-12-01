@@ -13,6 +13,9 @@ export interface LoginResponseWebVo {
   challengeId?: string;
   email?: string;
   displayName?: string;
+
+  // NEW: backend tells us if 2FA is already configured
+  hasTwoFactorConfigured?: boolean;
 }
 
 // Request payload for 2FA verify endpoint

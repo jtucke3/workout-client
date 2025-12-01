@@ -24,6 +24,20 @@ export class LoginService {
     );
   }
 
+  /**
+   * Begin 2FA setup for the given email.
+   * Backend responds with { otpauthUri: string }.
+   */
+  beginTwoFactorSetup(email: string): Promise<{ otpauthUri: string }> {
+    return firstValueFrom(
+      this.http.post<{ otpauthUri: string }>(
+        `${this.BASE}/2fa/enable`,
+        {}, // empty body; we send email as a query param
+        { params: { email } }
+      )
+    );
+  }
+
   storeToken(token: string, remember: boolean) {
     if (typeof window === 'undefined') {
       return;

@@ -1,182 +1,148 @@
-.screen {
-  height: 100dvh; 
-  width: 100vw;
-  display: grid;
-  place-items: center;
-  overflow: hidden; 
-  background: radial-gradient(1200px 700px at 20% 15%, #0b1225 0%, #0f172a 40%, #0b1225 100%),
-              linear-gradient(135deg, #0f172a, #1e293b);
-  color: #e5e7eb;
-  margin: 0;
-  padding: 0;
+.auth-page {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: radial-gradient(circle at top, #020617 0, #020617 40%, #020617 100%);
+  /* you can tweak this to exactly match your login gradient if you want */
 }
 
-.card {
+.auth-card {
   width: 100%;
-  max-width: 840px;
-  background: rgba(30, 41, 59, 0.9);
-  border: 1px solid rgba(148, 163, 184, 0.08);
-  border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(6px);
-  padding: 2.25rem;
+  max-width: 720px;
+  background: #020617;
+  border-radius: 1.5rem;
+  padding: 2rem 2.5rem 2rem;
+  box-shadow:
+    0 24px 60px rgba(15, 23, 42, 0.8),
+    0 0 0 1px rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  color: #e5e7eb;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-.card-head {
-  text-align: center;
-  margin-bottom: 1.25rem;
-
-  h1 {
-    margin: 0 0 .25rem 0;
-    font-size: clamp(1.4rem, 1.2rem + 1vw, 1.9rem);
-    font-weight: 800;
-    color: #ffffff;
-  }
-  p {
-    margin: 0;
-    color: #93a0b7;
-    font-size: .95rem;
-  }
+.register-card h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  text-align: left;
+  color: #f9fafb;
 }
 
-.form {
-  display: grid;
+.subtitle {
+  margin: 0 0 1.25rem;
+  font-size: 0.95rem;
+  color: #9ca3af;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
-
-  .row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-
-    @media (max-width: 700px) {
-      grid-template-columns: 1fr; 
-    }
-  }
-
-  .field {
-    display: grid;
-    gap: .4rem;
-
-    label {
-      font-weight: 600;
-      color: #dbe6f5;
-    }
-
-    input {
-      height: 44px;
-      padding: 0 .9rem;
-      border-radius: 10px;
-      border: 1px solid rgba(148, 163, 184, 0.15);
-      background: #334155;
-      color: #fff;
-      outline: none;
-      transition: border-color .2s, box-shadow .2s;
-
-      &::placeholder { color: #93a0b7; }
-      &:focus {
-        border-color: #60a5fa;
-        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
-      }
-      &.invalid {
-        border-color: #f87171;
-        box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.15);
-      }
-    }
-
-    small {
-      color: #f87171;
-      font-size: .8rem;
-      min-height: 1em;
-    }
-
-    .password-match-indicator {
-      margin-top: 0.25rem;
-      font-size: 0.8rem;
-      
-      .match-success {
-        color: #4ade80;
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-      }
-      
-      .match-error {
-        color: #f87171;
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-      }
-    }
-  }
-
-  .password-toggle-row {
-    margin: 0.5rem 0;
-    
-    .show-password {
-      display: inline-flex;
-      align-items: center;
-      gap: .5rem;
-      color: #c2ccdf;
-      cursor: pointer;
-      font-size: 0.9rem;
-
-      input {
-        width: 18px; 
-        height: 18px;
-        accent-color: #3b82f6;
-        cursor: pointer;
-      }
-
-      &:hover {
-        color: #dbe6f5;
-      }
-    }
-  }
-
-  .cta {
-    align-items: center;
-
-    button {
-      justify-self: end;
-      height: 44px;
-      padding: 0 1.2rem;
-      border: 0;
-      border-radius: 10px;
-      background: #3b82f6;
-      color: #fff;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform .04s ease, background .2s;
-
-      &:hover { background: #2563eb; }
-      &:active { transform: translateY(1px); }
-      &:disabled { background: #475569; cursor: not-allowed; }
-    }
-
-    @media (max-width: 700px) {
-      grid-template-columns: 1fr;
-      button { justify-self: stretch; }
-    }
-  }
-
-  .error {
-    text-align: center;
-    color: #fda4af;
-    margin-top: .25rem;
-  }
-
-  .links {
-    margin-top: .5rem;
-    display: flex;
-    justify-content: center;
-    gap: .5rem;
-    color: #9fb1cf;
-    a {
-      color: #7db0ff;
-      text-decoration: none;
-    }
-    a:hover { text-decoration: underline; }
-  }
 }
 
-:host, :root, html, body { height: 100%; }
+.field-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.field-group {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #e5e7eb;
+}
+
+input {
+  border-radius: 0.65rem;
+  border: 1px solid #1f2937;
+  background: #111827;
+  color: #e5e7eb;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+}
+
+input:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.3);
+  background: #020617;
+}
+
+.field-error {
+  font-size: 0.78rem;
+  color: #fca5a5;
+}
+
+button.primary {
+  margin-top: 0.75rem;
+  border-radius: 999px;
+  border: none;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: #2563eb;
+  color: #f9fafb;
+  box-shadow: 0 18px 40px rgba(37, 99, 235, 0.45);
+  transition: transform 80ms ease, box-shadow 120ms ease, background-color 120ms ease;
+}
+
+button.primary:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 22px 55px rgba(37, 99, 235, 0.55);
+}
+
+button.primary:disabled {
+  opacity: 0.55;
+  cursor: default;
+  box-shadow: none;
+}
+
+.error {
+  margin-top: 0.65rem;
+  font-size: 0.82rem;
+  color: #fecaca;
+}
+
+.success {
+  margin-top: 0.65rem;
+  font-size: 0.82rem;
+  color: #bbf7d0;
+}
+
+.footer-text {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.footer-text a {
+  color: #38bdf8;
+  text-decoration: none;
+}
+
+.footer-text a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .auth-card {
+    padding: 1.5rem 1.3rem 1.5rem;
+  }
+
+  .field-row {
+    flex-direction: column;
+  }
+}

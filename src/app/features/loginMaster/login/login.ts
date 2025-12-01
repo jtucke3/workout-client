@@ -52,30 +52,31 @@ export class Login {
     try {
       const payload: LoginRequestWebVo = {
         email: email!,
-        password: password!,
+        password: password!
       };
 
       const response = await this.loginService.login(payload);
 
-      // Normalize and store in-memory user
-      this.authUser.setUserFromAuthPayload(response);
-
-      // If backend says we need to verify 2FA now, go into verify mode.
+      // 1) If backend requires 2FA immediately, go to 2FA verify screen
       if (response.requires2FA && response.challengeId) {
         this.twoFaRequired.emit({
           challengeId: response.challengeId,
-          remember: !!remember,
+          remember: !!remember
         });
         return;
       }
 
+      // 2) Otherwise, we expect a normal token login
       if (response.token) {
         this.loginService.storeToken(response.token, !!remember);
+
+        // Normalize and store the current user
+        this.authUser.setUserFromAuthPayload(response);
 
         // If backend tells us this account does NOT have 2FA configured,
         // ask loginMaster to send the user into 2FA setup.
         const twoFaSetupRecommended =
-          (response as any).hasTwoFactorConfigured === false;
+          response.hasTwoFactorConfigured === false;
 
         this.loginSuccess.emit({ twoFaSetupRecommended });
         return;

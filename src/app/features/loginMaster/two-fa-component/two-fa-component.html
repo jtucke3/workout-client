@@ -1,7 +1,6 @@
 <!-- VERIFY MODE: user already has 2FA, they must enter 6-digit code -->
-
-<div *ngIf="mode === 'verify'" class="twofa-page">
-  <div class="twofa-card">
+<div *ngIf="mode === 'verify'" class="auth-page">
+  <div class="auth-card twofa-card">
     <h1>Two-factor verification</h1>
     <p class="subtitle">
       Enter the 6-digit code from your authenticator app to finish logging in.
@@ -38,61 +37,141 @@
   </div>
 </div>
 
-<!-- SETUP MODE: recommendation + optional setup steps -->
+<!-- SETUP MODE: recommendation + actual setup steps -->
+<div *ngIf="mode === 'setup'" class="auth-page">
+  <div class="auth-card twofa-card">
+    <ng-container [ngSwitch]="setupStep()">
 
-<div *ngIf="mode === 'setup'" class="twofa-page">
-  <div class="twofa-backdrop">
-    <div class="twofa-card">
-      <ng-container [ngSwitch]="setupStep()">
+      <!-- Step 1: Recommendation -->
+      <ng-container *ngSwitchCase="'recommend'">
+        <h1>Protect your account with 2FA</h1>
+        <p class="subtitle">
+          Two-factor authentication adds an extra layer of security so your workouts and personal data stay safe.
+        </p>
 
-        <!-- Step 1: Recommendation / explanation -->
-        <ng-container *ngSwitchCase="'recommend'">
-          <h1>Protect your account with 2FA</h1>
-          <p class="subtitle">
-            Two-factor authentication adds an extra layer of security to your Redbird Workout account.
-          </p>
+        <ul class="benefits">
+          <li>🔒 Stronger protection for your account</li>
+          <li>📱 Simple 6-digit code from your authenticator app</li>
+          <li>⚡ Takes less than a minute to configure</li>
+        </ul>
 
-          <ul class="benefits">
-            <li>🔒 Prevents unauthorized logins</li>
-            <li>📱 Simple 6-digit code from your authenticator app</li>
-            <li>⚡ Takes less than a minute to configure</li>
-          </ul>
+        <div class="actions">
+          <button type="button" class="primary" (click)="startSetup()">
+            Set up 2FA now
+          </button>
+          <button type="button" class="secondary" (click)="skipSetup()">
+            Remind me later
+          </button>
+        </div>
 
-          <div class="actions">
-            <button type="button" class="primary" (click)="startSetup()">
-              Set up 2FA now
-            </button>
-            <button type="button" class="secondary" (click)="skipSetup()">
-              Remind me later
-            </button>
-          </div>
-        </ng-container>
-
-        <!-- Step 2: Setup UI (placeholder until backend is ready) -->
-        <ng-container *ngSwitchCase="'configure'">
-          <h1>Set up 2FA</h1>
-          <p class="subtitle">
-            This is where your authenticator setup flow will go (QR code, secret key, and test code).
-          </p>
-
-          <ol class="setup-steps">
-            <li>Open your authenticator app (Google Authenticator, Authy, etc.).</li>
-            <li>Add a new account and scan the QR code from this screen.</li>
-            <li>Enter the 6-digit code from your app to confirm.</li>
-          </ol>
-
-          <!-- Placeholder actions until you wire real setup endpoints -->
-          <div class="actions">
-            <button type="button" class="primary" (click)="completeSetup()">
-              I've set it up – continue
-            </button>
-            <button type="button" class="secondary" (click)="backToRecommend()">
-              Back
-            </button>
-          </div>
-        </ng-container>
-
+        <p class="error" *ngIf="error()">{{ error() }}</p>
       </ng-container>
-    </div>
+
+      <!-- Step 2: Setup with QR + guard rail -->
+      <ng-container *ngSwitchCase="'configure'">
+        <h1>Set up two-factor authentication</h1>
+        <p class="subtitle">
+          Scan this QR code with the <strong>Google Authenticator</strong> app (or any other authenticator app).
+          If you don't have it yet, install it from the App Store or Google Play first.
+        </p>
+
+        <div *ngIf="isLoading()" class="setup-loading">
+          Generating your QR code...
+        </div>
+
+        <div *ngIf="!isLoading()">
+          <div *ngIf="setupQrUri(); else noQr">
+            <div class="qr-wrapper">
+              <qrcode
+                [qrdata]="setupQrUri()!"
+                [width]="200"
+                [errorCorrectionLevel]="'M'"
+              >
+              </qrcode>
+            </div>
+
+            <p *ngIf="setupSecret()" class="manual-secret">
+              Can't scan the QR code? In Google Authenticator, choose
+              <strong>"Enter a setup key"</strong> and paste this secret:
+              <code>{{ setupSecret() }}</code>
+            </p>
+
+            <ol class="setup-steps">
+              <li>Download and open Google Authenticator (or a similar app).</li>
+              <li>Tap <strong>+</strong> and choose <strong>"Scan a QR code"</strong>.</li>
+              <li>Scan the code above to add your RedbirdWorkout account.</li>
+              <li>You'll use the 6-digit code from the app each time you log in.</li>
+            </ol>
+
+            <!-- Guard rail section -->
+            <div class="confirm-section" [formGroup]="confirmForm">
+              <h2>Confirm setup</h2>
+              <p>
+                To avoid accidentally locking you out, please enter one 6-digit code from your app
+                and confirm that you've finished setting things up.
+              </p>
+
+              <div class="confirm-row">
+                <input
+                  type="text"
+                  maxlength="6"
+                  formControlName="confirmCode"
+                  inputmode="numeric"
+                  autocomplete="one-time-code"
+                  placeholder="123456"
+                  [class.invalid]="confirmForm.get('confirmCode')?.invalid && confirmForm.get('confirmCode')?.touched"
+                />
+
+                <div class="field-error"
+                     *ngIf="confirmForm.get('confirmCode')?.invalid && confirmForm.get('confirmCode')?.touched">
+                  Please enter a valid 6-digit code.
+                </div>
+
+                <div class="checkbox-line">
+                  <input
+                    id="ack"
+                    type="checkbox"
+                    formControlName="acknowledge"
+                  />
+                  <label for="ack">
+                    I’ve scanned the QR code and I can see a 6-digit code in my authenticator app.
+                  </label>
+                </div>
+
+                <div class="checkbox-error"
+                     *ngIf="confirmForm.get('acknowledge')?.invalid && confirmForm.get('acknowledge')?.touched">
+                  Please confirm that you have finished setting up your app.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noQr>
+            <p class="error">
+              We couldn't generate your QR code. Please go back and try again.
+            </p>
+          </ng-template>
+        </div>
+
+        <div class="actions">
+          <button
+            type="button"
+            class="primary"
+            (click)="completeSetup()"
+            [disabled]="confirmForm.invalid || isLoading()"
+          >
+            Enable 2FA & continue
+          </button>
+          <button type="button" class="secondary" (click)="backToRecommend()">
+            Back
+          </button>
+        </div>
+
+        <p class="error" *ngIf="!isLoading() && error()">
+          {{ error() }}
+        </p>
+      </ng-container>
+
+    </ng-container>
   </div>
 </div>
