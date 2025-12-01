@@ -205,3 +205,32 @@ button.secondary {
     padding: 1.8rem 1.5rem 1.8rem;
   }
 }
+
+/* Make the confirm-code input look like other auth inputs */
+.confirm-row input[type='text'],
+.confirm-row input[type='number'] {
+  height: 44px;
+  padding: 0 0.9rem;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  background: #334155;
+  color: #fff;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &::placeholder {
+    color: #93a0b7;
+  }
+
+  &:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  }
+
+  &.invalid {
+    border-color: #f87171;
+    box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.15);
+  }
+}
+
