@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import {
   LoginRequestWebVo,
   LoginResponseWebVo,
-  Verify2faRequestWebVo
+  Verify2faRequestWebVo,
 } from '../loginModels/login-api.models';
 
 @Injectable({ providedIn: 'root' })
@@ -24,26 +24,25 @@ export class LoginService {
     );
   }
 
-  /**
-   * Begin 2FA setup for the given email.
-   * Backend responds with { otpauthUri: string }.
-   */
   beginTwoFactorSetup(email: string): Promise<{ otpauthUri: string }> {
     return firstValueFrom(
       this.http.post<{ otpauthUri: string }>(
         `${this.BASE}/2fa/enable`,
-        {}, // empty body; we send email as a query param
+        null,
         { params: { email } }
       )
     );
   }
 
-  storeToken(token: string, remember: boolean) {
-    if (typeof window === 'undefined') {
-      return;
-    }
+  confirmTwoFactorSetup(email: string, code: string): Promise<void> {
+    return firstValueFrom(
+      this.http.post<void>(`${this.BASE}/2fa/confirm-setup`, { email, code })
+    );
+  }
 
-    if (remember) {
+  storeToken(token: string, rememberMe: boolean) {
+    if (typeof window === 'undefined') return;
+    if (rememberMe) {
       localStorage.setItem('token', token);
       sessionStorage.removeItem('token');
     } else {

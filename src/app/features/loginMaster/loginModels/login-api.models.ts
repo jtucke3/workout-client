@@ -23,3 +23,8 @@ export interface Verify2faRequestWebVo {
   challengeId: string;
   code: string;
 }
+export interface Confirm2faSetupRequestWebVo {
+  email: string;
+  code: string;
+}
+

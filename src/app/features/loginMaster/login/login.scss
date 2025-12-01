@@ -1,152 +1,176 @@
+/* Login screen — visually match Forgot Password card */
 
 .screen {
-  height: 100dvh; 
-  width: 100vw;
   display: grid;
   place-items: center;
-  overflow: hidden; 
+  padding: 0 1rem 40px 1rem;
+  min-height: 100vh;
   background: radial-gradient(1200px 700px at 20% 15%, #0b1225 0%, #0f172a 40%, #0b1225 100%),
               linear-gradient(135deg, #0f172a, #1e293b);
-  color: #e5e7eb;
-  margin: 0;
-  padding: 0;
 }
 
+/* Card shell – same look as .forgot-card */
 .card {
   width: 100%;
-  max-width: 840px;
+  max-width: 420px;
   background: rgba(30, 41, 59, 0.9);
-  border: 1px solid rgba(148, 163, 184, 0.08);
-  border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 18px;
+  padding: 2.2rem;
   backdrop-filter: blur(6px);
-  padding: 2.25rem;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  display: grid;
+  gap: 1.5rem;
+  color: #e5e7eb;
 }
 
+/* Title + subtitle (same typography as reset screen) */
 .card-head {
   text-align: center;
-  margin-bottom: 1.25rem;
 
   h1 {
-    margin: 0 0 .25rem 0;
-    font-size: clamp(1.4rem, 1.2rem + 1vw, 1.9rem);
+    margin: 0 0 0.25rem 0;
+    font-size: 1.8rem;
     font-weight: 800;
     color: #ffffff;
   }
+
   p {
     margin: 0;
     color: #93a0b7;
-    font-size: .95rem;
+    font-size: 0.95rem;
   }
 }
 
+/* Form layout — single column like reset password */
 .form {
   display: grid;
   gap: 1rem;
+}
 
-  .row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+/* Grouping rows (we keep the .row markup but visually it’s just a stack) */
+.row {
+  display: grid;
+  gap: 1rem;
+}
 
-    @media (max-width: 700px) {
-      grid-template-columns: 1fr; 
+/* Fields – copy of Forgot Password .field */
+.field {
+  display: grid;
+  gap: 0.4rem;
+
+  label {
+    font-weight: 600;
+    color: #dbe6f5;
+  }
+
+  input {
+    height: 44px;
+    padding: 0 0.9rem;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    background: #334155;
+    color: #fff;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+
+    &::placeholder {
+      color: #93a0b7;
+    }
+
+    &:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    &.invalid {
+      border-color: #f87171;
+      box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.15);
     }
   }
 
-  .field {
-    display: grid;
-    gap: .4rem;
-
-    label {
-      font-weight: 600;
-      color: #dbe6f5;
-    }
-
-    input {
-      height: 44px;
-      padding: 0 .9rem;
-      border-radius: 10px;
-      border: 1px solid rgba(148, 163, 184, 0.15);
-      background: #334155;
-      color: #fff;
-      outline: none;
-      transition: border-color .2s, box-shadow .2s;
-
-      &::placeholder { color: #93a0b7; }
-      &:focus {
-        border-color: #60a5fa;
-        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
-      }
-      &.invalid {
-        border-color: #f87171;
-        box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.15);
-      }
-    }
-
-    small {
-      color: #f87171;
-      font-size: .8rem;
-      min-height: 1em;
-    }
-  }
-
-  .cta {
-    align-items: center;
-
-    .remember {
-      display: inline-flex;
-      align-items: center;
-      gap: .5rem;
-      color: #c2ccdf;
-
-      input {
-        width: 18px; height: 18px;
-        accent-color: #3b82f6;
-      }
-    }
-
-    button {
-      justify-self: end;
-      height: 44px;
-      padding: 0 1.2rem;
-      border: 0;
-      border-radius: 10px;
-      background: #3b82f6;
-      color: #fff;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform .04s ease, background .2s;
-
-      &:hover { background: #2563eb; }
-      &:active { transform: translateY(1px); }
-      &:disabled { background: #475569; cursor: not-allowed; }
-    }
-
-    @media (max-width: 700px) {
-      grid-template-columns: 1fr;
-      button { justify-self: stretch; }
-    }
-  }
-
-  .error {
-    text-align: center;
-    color: #fda4af;
-    margin-top: .25rem;
-  }
-
-  .links {
-    margin-top: .5rem;
-    display: flex;
-    justify-content: center;
-    gap: .5rem;
-    color: #9fb1cf;
-    a {
-      color: #7db0ff;
-      text-decoration: none;
-    }
-    a:hover { text-decoration: underline; }
+  small {
+    color: #f87171;
+    font-size: 0.8rem;
+    min-height: 1em;
   }
 }
 
-:host, :root, html, body { height: 100%; }
+/* Remember-me + error text layout */
+.remember {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #c2ccdf;
+  font-size: 0.85rem;
+
+  input[type='checkbox'] {
+    width: 18px;
+    height: 18px;
+    accent-color: #3b82f6;
+  }
+}
+
+/* Shared login error message style, aligned with reset info/error style */
+.error {
+  color: #f87171;
+  font-size: 0.85rem;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+/* Main submit button – EXACT same behavior as .blue-btn (Forgot Password) */
+button {
+  height: 44px;
+  padding: 0 1.4rem;
+  border-radius: 10px;
+  border: none;
+  background: #3b82f6;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+  justify-self: stretch;
+  transition: background 0.2s, transform 0.05s;
+
+  &:hover {
+    background: #2563eb;
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+
+  &:disabled {
+    background: #475569;
+    cursor: not-allowed;
+  }
+}
+
+/* Bottom links row – copied from Forgot Password .links */
+.links {
+  margin-top: 0.75rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+
+  span {
+    color: #9fb1cf;
+  }
+
+  a {
+    color: #7db0ff;
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+}
+
+:host,
+:root,
+html,
+body {
+  height: 100%;
+}

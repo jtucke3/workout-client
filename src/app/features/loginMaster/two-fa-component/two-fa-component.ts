@@ -151,11 +151,11 @@ export class TwoFaComponent {
     this.cancelled.emit();
   }
 
-  /**
+   /**
    * User confirms they have scanned the QR and set up their authenticator app.
    * Guard rail: they must enter a 6-digit code and tick the checkbox first.
    */
-  completeSetup() {
+  async completeSetup() {
     if (this.mode !== 'setup') return;
 
     if (this.confirmForm.invalid) {
@@ -163,10 +163,34 @@ export class TwoFaComponent {
       return;
     }
 
-    // We don't need the code value on the frontend for now; we just
-    // require the user to have opened their app and read a code.
-    this.completed.emit();
+    const currentUser = this.authUser.user();
+    const email = currentUser?.email;
+
+    if (!email) {
+      this.error.set('Could not determine your account email. Please log in again.');
+      return;
+    }
+
+    const code = this.confirmForm.get('confirmCode')?.value ?? '';
+
+    this.isLoading.set(true);
+    this.error.set(null);
+
+    try {
+      await this.loginService.confirmTwoFactorSetup(email, code);
+      // At this point backend has flipped two_factor_enabled = true
+      this.completed.emit();
+    } catch (err: any) {
+      console.error('Confirm 2FA setup error', err);
+      this.error.set(
+        err?.message ||
+          'That code did not work. Please double-check it in your app and try again.'
+      );
+    } finally {
+      this.isLoading.set(false);
+    }
   }
+
 
   backToRecommend() {
     if (this.mode !== 'setup') return;
@@ -179,4 +203,6 @@ export class TwoFaComponent {
     const match = uri.match(/secret=([^&]+)/i);
     return match ? match[1] : null;
   }
+
+  
 }
