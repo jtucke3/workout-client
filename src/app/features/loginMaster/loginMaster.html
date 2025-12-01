@@ -1,16 +1,29 @@
-<div class="screen">
-  <app-login
-    *ngIf="step() === 'login'"
-    (loginSuccess)="onLoginSuccess()
-    "
-    (twoFaRequired)="onTwoFaRequired($event)"
-  ></app-login>
+<div class="login-master-shell">
+  <ng-container [ngSwitch]="mode()">
 
-  <app-two-fa
-    *ngIf="step() === '2fa'"
-    [challengeId]="challengeId()!"
-    [remember]="remember()"
-    (verified)="onTwoFaVerified()"
-    (backToLogin)="backToLogin()"
-  ></app-two-fa>
+    <app-login
+      *ngSwitchCase="'login'"
+      (loginSuccess)="handleLoginSuccess($event)"
+      (twoFaRequired)="handleTwoFaRequired($event)"
+    >
+    </app-login>
+
+    <app-two-fa-component
+      *ngSwitchCase="'twofa-verify'"
+      [mode]="'verify'"
+      [challengeId]="twoFaChallengeId()"
+      (completed)="handleTwoFaVerified()"
+      (cancelled)="handleTwoFaVerifyCancelled()"
+    >
+    </app-two-fa-component>
+
+    <app-two-fa-component
+      *ngSwitchCase="'twofa-setup'"
+      [mode]="'setup'"
+      (completed)="handleTwoFaSetupCompleted()"
+      (cancelled)="handleTwoFaSetupCancelled()"
+    >
+    </app-two-fa-component>
+
+  </ng-container>
 </div>

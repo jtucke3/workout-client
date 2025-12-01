@@ -1,7 +1,8 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { Router } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
+import { AuthUserService } from '../../services/auth-user.service';
+import { LoginService } from '../../../features/loginMaster/loginService/login.service';
 
 @Component({
   selector: 'app-navbar',
@@ -12,50 +13,37 @@ import { Router } from '@angular/router';
 })
 export class Navbar {
   private router = inject(Router);
-  isLoading = signal(true);
-  user = signal<{ displayName?: string; email?: string } | null>(null);
+  private authUser = inject(AuthUserService);
+  private loginService = inject(LoginService);
 
-  constructor() {
-    // Only load user in the browser. During SSR there is no localStorage/window.
-    if (typeof window !== 'undefined') {
-      this.loadUser();
-    } else {
-      this.isLoading.set(false);
-    }
-  }
-
-  logout() {
-    localStorage.removeItem('token');
-    fetch('/api/auth/logout', { method: 'POST' });
-    window.location.href = '/login';
-}
+  // Used by navbar.html: user()?.displayName, user()?.email
+  user = this.authUser.user;
 
   goToProfile() {
     this.router.navigateByUrl('/profile');
   }
 
-  private async loadUser() {
-    this.isLoading.set(true);
-    // Try cached user first
-    const cached = localStorage.getItem('user');
-    if (cached) {
-      try { this.user.set(JSON.parse(cached)); } catch { this.user.set(null); }
-    }
+  logout() {
+    // Best effort logout to backend if we have a token
+    const token = this.loginService.getToken();
 
-    try {
-      const token = localStorage.getItem('token');
-      const headers: Record<string,string> = { 'Accept': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-      const res = await fetch('/api/auth/me', { headers });
-      if (res.ok) {
-        const data = await res.json();
-        this.user.set({ displayName: data.displayName || data.name || data.display_name, email: data.email });
-        try { localStorage.setItem('user', JSON.stringify(data)); } catch {}
+    if (typeof window !== 'undefined') {
+      if (token) {
+        fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }).catch(() => {
+          // Ignore network/logging errors on logout
+        });
       }
-    } catch (e) {
-      // network error — keep cached if present
-    } finally {
-      this.isLoading.set(false);
+
+      // Clear auth state on the client
+      this.loginService.clearToken();
+      this.authUser.clear();
+
+      this.router.navigateByUrl('/login');
     }
   }
 }

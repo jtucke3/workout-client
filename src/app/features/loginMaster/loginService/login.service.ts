@@ -1,8 +1,6 @@
-// loginService/login.service.ts
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-
 import {
   LoginRequestWebVo,
   LoginResponseWebVo,
@@ -12,30 +10,25 @@ import {
 @Injectable({ providedIn: 'root' })
 export class LoginService {
   private http = inject(HttpClient);
+  private readonly BASE = '/api/auth';
 
-  // if you later add environments, change this to environment.apiBaseUrl + '/auth'
-  private readonly API_BASE = '/api/auth';
-
-  login(req: LoginRequestWebVo): Promise<LoginResponseWebVo> {
+  login(payload: LoginRequestWebVo): Promise<LoginResponseWebVo> {
     return firstValueFrom(
-      this.http.post<LoginResponseWebVo>(`${this.API_BASE}/login`, req)
+      this.http.post<LoginResponseWebVo>(`${this.BASE}/login`, payload)
     );
   }
 
-  verify2fa(req: Verify2faRequestWebVo): Promise<LoginResponseWebVo> {
+  verifyTwoFactor(payload: Verify2faRequestWebVo): Promise<LoginResponseWebVo> {
     return firstValueFrom(
-      this.http.post<LoginResponseWebVo>(`${this.API_BASE}/2fa/verify`, req)
-    );
-  }
-
-  enable2fa(email: string): Promise<string> {
-    // just returns the otpauth URI as plain text (for now)
-    return firstValueFrom(
-      this.http.post(`${this.API_BASE}/2fa/enable?email=${encodeURIComponent(email)}`, {}, { responseType: 'text' })
+      this.http.post<LoginResponseWebVo>(`${this.BASE}/2fa/verify`, payload)
     );
   }
 
   storeToken(token: string, remember: boolean) {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     if (remember) {
       localStorage.setItem('token', token);
       sessionStorage.removeItem('token');
@@ -45,12 +38,14 @@ export class LoginService {
     }
   }
 
-  clearToken() {
-    localStorage.removeItem('token');
-    sessionStorage.removeItem('token');
+  getToken(): string | null {
+    if (typeof window === 'undefined') return null;
+    return sessionStorage.getItem('token') || localStorage.getItem('token');
   }
 
-  getToken(): string | null {
-    return localStorage.getItem('token') || sessionStorage.getItem('token');
+  clearToken() {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
   }
 }
