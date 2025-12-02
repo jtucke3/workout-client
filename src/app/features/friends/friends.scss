@@ -1,0 +1,250 @@
+.friends-page {
+  /* PUSH CONTENT BELOW NAVBAR */
+  padding: 5.5rem 1.75rem 2.5rem; /* top padding increased from ~1.5rem */
+  max-width: 960px;
+  margin: 0 auto;
+  color: #e5e7eb;
+}
+
+.friends-card {
+  background: rgba(15, 23, 42, 0.95);
+  border-radius: 18px;
+  padding: 1.75rem 1.9rem;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.9);
+}
+
+.friends-header {
+  margin-bottom: 1.4rem;
+
+  h2 {
+    font-size: 1.45rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #9ca3af;
+  }
+}
+
+/* SEARCH */
+
+.friends-search {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+
+  input {
+    flex: 1;
+    height: 44px;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    background: #020617;
+    padding: 0 0.9rem;
+    color: #e5e7eb;
+    font-size: 0.95rem;
+
+    &::placeholder {
+      color: #64748b;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.28);
+    }
+  }
+}
+
+.friends-error {
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  color: #fecaca;
+}
+
+/* SEARCH RESULTS */
+
+.friends-results {
+  margin-bottom: 1.5rem;
+
+  .friends-results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.5rem;
+
+    h3 {
+      font-size: 1rem;
+      margin: 0;
+    }
+
+    .count {
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+  }
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid rgba(30, 64, 175, 0.3);
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+  }
+}
+
+/* FRIENDS LIST */
+
+.friends-list {
+  margin-top: 0.75rem;
+
+  .friends-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.5rem;
+
+    h3 {
+      font-size: 1rem;
+      margin: 0;
+    }
+
+    .count {
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+  }
+
+  .friends-loading {
+    font-size: 0.9rem;
+    color: #9ca3af;
+  }
+
+  .friends-empty {
+    font-size: 0.9rem;
+    color: #9ca3af;
+  }
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.55rem 0;
+      border-bottom: 1px solid rgba(30, 64, 175, 0.3);
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+  }
+}
+
+/* REUSED PIECES */
+
+.friend-info {
+  display: flex;
+  flex-direction: column;
+
+  .friend-name {
+    font-weight: 600;
+    font-size: 0.98rem;
+  }
+}
+
+.friend-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-pill {
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+
+  &.pending {
+    background: rgba(248, 250, 252, 0.06);
+    border: 1px solid rgba(148, 163, 184, 0.6);
+    color: #e5e7eb;
+  }
+
+  &.friend {
+    background: rgba(22, 163, 74, 0.2);
+    border: 1px solid rgba(22, 163, 74, 0.7);
+    color: #bbf7d0;
+  }
+}
+
+/* BUTTONS */
+
+.blue-btn,
+.blue-outline-btn,
+.danger-outline-btn {
+  height: 38px;
+  padding: 0 1.2rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, border-color 0.2s, transform 0.05s;
+
+  &:active {
+    transform: translateY(1px);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: default;
+  }
+}
+
+.blue-btn {
+  border: none;
+  background: #3b82f6;
+  color: #ffffff;
+
+  &:hover:not(:disabled) {
+    background: #2563eb;
+  }
+}
+
+.blue-outline-btn {
+  border: 1px solid #3b82f6;
+  background: transparent;
+  color: #bfdbfe;
+
+  &:hover:not(:disabled) {
+    background: rgba(37, 99, 235, 0.15);
+  }
+}
+
+.danger-outline-btn {
+  border: 1px solid #f97373;
+  background: transparent;
+  color: #fecaca;
+
+  &:hover:not(:disabled) {
+    background: rgba(248, 113, 113, 0.15);
+  }
+}

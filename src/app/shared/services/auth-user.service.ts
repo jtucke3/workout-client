@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 
 export interface CurrentUser {
   id?: string;
@@ -18,6 +18,7 @@ export interface CurrentUser {
 export class AuthUserService {
   private readonly _user = signal<CurrentUser | null>(null);
 
+  // Read-only signal for consumers
   readonly user = this._user;
 
   /**
@@ -29,13 +30,20 @@ export class AuthUserService {
   setUserFromAuthPayload(payload: any | null | undefined): void {
     if (!payload) {
       this._user.set(null);
+      console.log('[AuthUserService] Cleared current user (no payload)');
       return;
     }
 
     const userPart = (payload as any).user ?? payload;
 
     const normalized: CurrentUser = {
-      id: userPart.id ?? (payload as any).id,
+      // be VERY forgiving about id field names
+      id:
+        userPart.id ??
+        userPart.userId ??
+        (payload as any).id ??
+        (payload as any).userId,
+
       email: userPart.email ?? (payload as any).email,
       displayName: userPart.displayName ?? (payload as any).displayName,
       username:
@@ -44,11 +52,21 @@ export class AuthUserService {
         (payload as any).displayName ??
         userPart.email ??
         (payload as any).email,
+
       weight: userPart.weight,
-      preferredUnit: userPart.preferredUnit,
+      preferredUnit: userPart.preferredUnit ?? (payload as any).preferredUnit
     };
 
     this._user.set(normalized);
+    console.log('[AuthUserService] Set current user:', normalized);
+  }
+
+  /**
+   * Alias for older code paths that think in terms of "backend user" directly.
+   * Internally just forwards to setUserFromAuthPayload.
+   */
+  setFromBackendUser(raw: any | null | undefined): void {
+    this.setUserFromAuthPayload(raw);
   }
 
   /**
@@ -56,9 +74,11 @@ export class AuthUserService {
    */
   setUser(user: CurrentUser | null): void {
     this._user.set(user);
+    console.log('[AuthUserService] Set current user explicitly:', user);
   }
 
   clear(): void {
     this._user.set(null);
+    console.log('[AuthUserService] Cleared current user (logout)');
   }
 }
