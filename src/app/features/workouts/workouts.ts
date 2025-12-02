@@ -36,6 +36,10 @@ export class Workouts {
   createDate = signal(this.defaultDateTime());
   createNotes = signal('');
 
+  // Edit state for selected workout
+  editTitle = signal('');
+  editNotes = signal('');
+
   // Form state for adding exercise
   exName = signal('');
   exEquipment = signal('');
@@ -107,11 +111,24 @@ export class Workouts {
     this.workout.set(w);
     // Enter logging mode if workout has no exercises yet (likely actively logging)
     this.loggingMode.set(w.exercises.length === 0);
+    // Initialize edit fields
+    this.editTitle.set(w.title || '');
+    this.editNotes.set(w.notes || '');
+  }
+
+  // Explicitly start logging for an existing workout
+  startWorkout(w: WorkoutResponseWebVo): void {
+    this.workout.set(w);
+    this.loggingMode.set(true);
+    this.editTitle.set(w.title || '');
+    this.editNotes.set(w.notes || '');
   }
 
   backToList(): void {
     this.workout.set(null);
     this.loggingMode.set(false);
+    this.editTitle.set('');
+    this.editNotes.set('');
   }
 
   // lifecycle-like init (standalone component, no ngOnInit imported)
@@ -198,6 +215,53 @@ export class Workouts {
     const existing = current[exId] || { weight: 0, reps: 0 };
     const updated = { ...current, [exId]: { ...existing, [field]: value } };
     this.pendingSetInputs.set(updated);
+  }
+
+  async removeExercise(ex: ExerciseResponseWebVo): Promise<void> {
+    const w = this.workout();
+    if (!w) return;
+    this.loading.set(true);
+    this.error.set(null);
+    try {
+      const updated = await this.http.delete<WorkoutResponseWebVo>(`/api/workouts/${w.id}/exercises/${ex.id}`, { headers: this.headers() }).toPromise();
+      if (updated) {
+        this.workout.set(updated);
+        this.workoutsList.set(this.workoutsList().map(x => x.id === updated.id ? updated : x));
+      } else {
+        this.workout.set({ ...w, exercises: w.exercises.filter(e => e.id !== ex.id) });
+      }
+    } catch (e: any) {
+      this.error.set(e?.message || 'Failed to remove exercise');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async updateWorkout(): Promise<void> {
+    const w = this.workout();
+    if (!w) return;
+    this.loading.set(true);
+    this.error.set(null);
+    const body = {
+      title: this.editTitle().trim() || w.title,
+      notes: this.editNotes().trim() || null,
+      workoutAt: w.workoutAt
+    };
+    try {
+      const updated = await this.http.put<WorkoutResponseWebVo>(`/api/workouts/${w.id}`, body, { headers: this.headers() }).toPromise();
+      if (updated) {
+        this.workout.set(updated);
+        // keep edit fields in sync
+        this.editTitle.set(updated.title || '');
+        this.editNotes.set(updated.notes || '');
+        // also refresh list entry
+        this.workoutsList.set(this.workoutsList().map(x => x.id === updated.id ? updated : x));
+      }
+    } catch (e: any) {
+      this.error.set(e?.message || 'Failed to update workout');
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   async removeSet(ex: ExerciseResponseWebVo, set: SetResponseWebVo): Promise<void> {

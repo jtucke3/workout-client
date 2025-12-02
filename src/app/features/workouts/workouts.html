@@ -16,8 +16,8 @@
 		</div>
 	</div>
 
-		<!-- Floating Log Workout Button -->
-		<button class="add-workout-btn" (click)="showCreateModal.set(true)">Log Workout</button>
+		<!-- Floating Start Workout Button -->
+		<button class="add-workout-btn" (click)="showCreateModal.set(true)">Start Workout</button>
 
 		<!-- Workouts List -->
 		<div class="workouts-list" *ngIf="!workout()">
@@ -32,6 +32,7 @@
 						<div class="wc-meta">
 							<span>{{ w.exercises.length }} exercises</span>
 							<button class="open-btn" (click)="viewWorkout(w)">Open</button>
+							<button class="open-btn" (click)="startWorkout(w)">Start</button>
 						</div>
 					</div>
 				</div>
@@ -44,7 +45,7 @@
 		<!-- Create Workout Modal -->
 		<div class="modal-backdrop" *ngIf="showCreateModal()">
 			<div class="modal-card">
-				<h3>Log Workout</h3>
+				<h3>Start Workout</h3>
 				<form (ngSubmit)="createWorkout()" class="workout-form">
 					<div class="form-row">
 						<label>Title *</label>
@@ -61,7 +62,7 @@
 						</div>
 					</div>
 					<div class="modal-actions">
-						<button type="submit" class="blue-btn" [disabled]="loading() || !createTitle().trim()">Log Workout</button>
+						<button type="submit" class="blue-btn" [disabled]="loading() || !createTitle().trim()">Start Workout</button>
 						<button type="button" class="cancel-btn" (click)="showCreateModal.set(false)">Cancel</button>
 					</div>
 				</form>
@@ -72,9 +73,13 @@
 	<!-- Workout Detail -->
 	<div class="workout-detail" *ngIf="workout() as w">
 		<div class="workout-header-card">
-			<h2>{{ w.title }}</h2>
-			<button class="back-btn" (click)="backToList()">← Back</button>
-			<p class="notes" *ngIf="w.notes">{{ w.notes }}</p>
+			<div class="workout-title-edit">
+				<input type="text" [value]="editTitle()" (input)="editTitle.set($any($event.target).value)" />
+				<button class="ghost-btn" (click)="backToList()" title="Back to list">Back</button>
+			</div>
+			<div class="notes-edit">
+				<input type="text" [value]="editNotes()" (input)="editNotes.set($any($event.target).value)" placeholder="Notes" />
+			</div>
 			<div class="logging-hint" *ngIf="loggingMode()">Rapid logging mode: add exercises and sets quickly.</div>
 		</div>
 
@@ -101,6 +106,7 @@
 					</div>
 					<div class="exercise-actions">
 						<button class="action-btn" (click)="addSet(ex)" title="Add Set">➕</button>
+						<button class="action-btn danger" (click)="removeExercise(ex)" title="Remove Exercise">Delete</button>
 					</div>
 				</div>
 				<p class="ex-notes" *ngIf="ex.notes">{{ ex.notes }}</p>
