@@ -72,23 +72,56 @@
 
 	<!-- Workout Detail -->
 	<div class="workout-detail" *ngIf="workout() as w">
-		<div class="workout-header-card">
-			<div class="workout-title-edit">
-				<input type="text" [value]="editTitle()" (input)="editTitle.set($any($event.target).value)" />
-				<button class="ghost-btn" (click)="backToList()" title="Back to list">Back</button>
+			<div class="tabs">
+				<button [class.active]="activeTab() === 'recents'" (click)="activeTab.set('recents')">Recents</button>
+				<button [class.active]="activeTab() === 'calendar'" (click)="activeTab.set('calendar')">Calendar</button>
 			</div>
-			<div class="notes-edit">
-				<input type="text" [value]="editNotes()" (input)="editNotes.set($any($event.target).value)" placeholder="Notes" />
-			</div>
-			<div class="logging-hint" *ngIf="loggingMode()">Rapid logging mode: add exercises and sets quickly.</div>
-		</div>
+			<ng-container *ngIf="activeTab() === 'recents'">
+				<ng-container *ngIf="workoutsList().length; else emptyList">
+					<div class="workouts-grid">
+						<div class="workout-card-mini" *ngFor="let w of workoutsList()">
+							<div class="wc-header">
+								<h3>{{ w.title }}</h3>
+								<span class="date-chip">{{ w.workoutAt }}</span>
+							</div>
+							<p class="wc-notes" *ngIf="w.notes">{{ w.notes }}</p>
+							<div class="wc-meta">
+								<span>{{ w.exercises.length }} exercises</span>
+								<button class="open-btn" (click)="viewWorkout(w)">Open</button>
+								<button class="open-btn" (click)="startWorkout(w)">Start</button>
+							</div>
+						</div>
+					</div>
+				</ng-container>
+			</ng-container>
 
-		<!-- Add Exercise Card -->
-		<div class="exercise-form-card">
-			<h3>Add Exercise</h3>
-			<div class="exercise-form-grid">
+			<ng-container *ngIf="activeTab() === 'calendar'">
+				<div class="calendar-controls">
+					<label for="wdate">Select Date</label>
+					<input id="wdate" type="date" [value]="selectedDate()" (input)="selectedDate.set($any($event.target).value)" />
+					<button class="open-btn" (click)="loadWorkouts()" [disabled]="loading()">Refresh</button>
+				</div>
+				<div class="workouts-grid" *ngIf="workoutsByDate().length; else noDateResults">
+					<div class="workout-card-mini" *ngFor="let w of workoutsByDate()">
+						<div class="wc-header">
+							<h3>{{ w.title }}</h3>
+							<span class="date-chip">{{ w.workoutAt }}</span>
+						</div>
+						<p class="wc-notes" *ngIf="w.notes">{{ w.notes }}</p>
+						<div class="wc-meta">
+							<span>{{ w.exercises.length }} exercises</span>
+							<button class="open-btn" (click)="viewWorkout(w)">Open</button>
+							<button class="open-btn" (click)="startWorkout(w)">Start</button>
+						</div>
+					</div>
+				</div>
+				<ng-template #noDateResults>
+					<p class="empty-hint">No workouts found for the selected date.</p>
+				</ng-template>
+			</ng-container>
+			
 				<input type="text" placeholder="Name *" [value]="exName()" (input)="exName.set($any($event.target).value)" />
-				<input type="text" placeholder="Equipment" [value]="exEquipment()" (input)="exEquipment.set($any($event.target).value)" />
+				<p class="empty-hint">No workouts yet. Use Start Workout to create one.</p>
 				<input type="text" placeholder="Body Part" [value]="exBodyPart()" (input)="exBodyPart.set($any($event.target).value)" />
 				<input type="text" placeholder="Notes" [value]="exNotes()" (input)="exNotes.set($any($event.target).value)" />
 				<button class="add-ex-btn" (click)="addExercise()" [disabled]="loading() || !exName().trim()">➕ Add Exercise</button>

@@ -48,6 +48,13 @@
 
 /* Workouts list grid */
 .workouts-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:1.25rem; margin-bottom:2rem; }
+.tabs { display:flex; gap:.5rem; margin:0 0 1rem; }
+.tabs button { padding:8px 14px; background:rgba(148,163,184,.12); color:#e2e8f0; border:1px solid rgba(148,163,184,.25); border-radius:10px; font-weight:700; cursor:pointer; transition:.2s; }
+.tabs button:hover { background:rgba(148,163,184,.22); }
+.tabs button.active { background:rgba(59,130,246,.25); border-color:rgba(59,130,246,.45); color:#93c5fd; }
+
+.calendar-controls { display:flex; gap:.6rem; align-items:center; margin-bottom:1rem; }
+.calendar-controls input[type="date"] { padding:8px 10px; background:rgba(51,65,85,.75); border:1px solid rgba(148,163,184,.25); color:#fff; border-radius:8px; }
 .workout-card-mini { background:rgba(30,41,59,.85); border:1px solid rgba(148,163,184,.15); border-radius:14px; padding:1rem 1.2rem; display:grid; gap:.6rem; box-shadow:0 6px 20px rgba(0,0,0,.3); transition:.25s; }
 .workout-card-mini:hover { border-color:rgba(148,163,184,.3); box-shadow:0 10px 28px rgba(0,0,0,.4); transform:translateY(-3px); }
 .workout-card-mini h3 { margin:0; font-size:1.05rem; font-weight:700; color:#fff; }

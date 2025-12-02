@@ -22,6 +22,9 @@ export class Workouts {
   // Signals for state (logic added later)
   workout = signal<WorkoutResponseWebVo | null>(null);
   workoutsList = signal<WorkoutResponseWebVo[]>([]);
+  // Tabs: 'recents' | 'calendar'
+  activeTab = signal<'recents' | 'calendar'>('recents');
+  selectedDate = signal<string>('');
   loading = signal(false);
   error = signal<string | null>(null);
   showCreateModal = signal(false);
@@ -101,7 +104,8 @@ export class Workouts {
     if (!uid) return;
     try {
       const list = await this.http.get<WorkoutResponseWebVo[]>(`/api/workouts?userId=${encodeURIComponent(uid)}`, { headers: this.headers() }).toPromise();
-      this.workoutsList.set(list || []);
+      const sorted = (list || []).slice().sort((a,b) => new Date(b.workoutAt).getTime() - new Date(a.workoutAt).getTime());
+      this.workoutsList.set(sorted);
     } catch (e: any) {
       this.error.set(e?.message || 'Failed to load workouts');
     }
@@ -129,6 +133,8 @@ export class Workouts {
     this.loggingMode.set(false);
     this.editTitle.set('');
     this.editNotes.set('');
+    // default to recents tab when returning
+    this.activeTab.set('recents');
   }
 
   // lifecycle-like init (standalone component, no ngOnInit imported)
@@ -215,6 +221,20 @@ export class Workouts {
     const existing = current[exId] || { weight: 0, reps: 0 };
     const updated = { ...current, [exId]: { ...existing, [field]: value } };
     this.pendingSetInputs.set(updated);
+  }
+
+  // Filter workouts by selected date (YYYY-MM-DD)
+  workoutsByDate(): WorkoutResponseWebVo[] {
+    const dateStr = this.selectedDate();
+    if (!dateStr) return [];
+    const d = new Date(dateStr);
+    const y = d.getFullYear();
+    const m = d.getMonth();
+    const day = d.getDate();
+    return this.workoutsList().filter(w => {
+      const wd = new Date(w.workoutAt);
+      return wd.getFullYear() === y && wd.getMonth() === m && wd.getDate() === day;
+    });
   }
 
   async removeExercise(ex: ExerciseResponseWebVo): Promise<void> {
