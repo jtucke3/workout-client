@@ -23,6 +23,7 @@ export class Workouts {
   workout = signal<WorkoutResponseWebVo | null>(null);
   loading = signal(false);
   error = signal<string | null>(null);
+  showCreateModal = signal(false);
 
   // Form state for creating workout
   createTitle = signal('');
@@ -72,6 +73,7 @@ export class Workouts {
     try {
       const w = await this.http.post<WorkoutResponseWebVo>(`/api/workouts?userId=${encodeURIComponent(uid)}`, body, { headers: this.headers() }).toPromise();
       this.workout.set(w || null);
+      this.showCreateModal.set(false);
     } catch (e: any) {
       this.error.set(e?.message || 'Failed to create workout');
     } finally {
@@ -145,6 +147,20 @@ export class Workouts {
     } catch (e: any) {
       Object.assign(set, original);
       this.error.set(e?.message || 'Failed to update set');
+    }
+  }
+
+  async saveSet(ex: ExerciseResponseWebVo, set: SetResponseWebVo): Promise<void> {
+    const w = this.workout();
+    if (!w) return;
+    this.loading.set(true);
+    this.error.set(null);
+    try {
+      await this.http.put(`/api/workouts/${w.id}/exercises/${ex.id}/sets/${set.setId}`, { setId: set.setId, weight: set.weight, reps: set.reps }, { headers: this.headers() }).toPromise();
+    } catch (e: any) {
+      this.error.set(e?.message || 'Failed to save set');
+    } finally {
+      this.loading.set(false);
     }
   }
 

@@ -12,29 +12,36 @@
 		</div>
 	</div>
 
-	<!-- Create Workout Card -->
-	<div class="create-workout-card" *ngIf="!workout()">
-		<form (ngSubmit)="createWorkout()" class="workout-form">
-			<div class="form-row">
-				<label>Title *</label>
-				<input type="text" [value]="createTitle()" (input)="createTitle.set($any($event.target).value)" required placeholder="Push Day" />
+		<!-- Floating Log Workout Button -->
+		<button class="add-workout-btn" (click)="showCreateModal.set(true)">Log Workout</button>
+
+		<!-- Create Workout Modal -->
+		<div class="modal-backdrop" *ngIf="showCreateModal()">
+			<div class="modal-card">
+				<h3>Log Workout</h3>
+				<form (ngSubmit)="createWorkout()" class="workout-form">
+					<div class="form-row">
+						<label>Title *</label>
+						<input type="text" [value]="createTitle()" (input)="createTitle.set($any($event.target).value)" required placeholder="Push Day" />
+					</div>
+					<div class="form-row two-col">
+						<div class="field">
+							<label>Date & Time *</label>
+							<input type="datetime-local" [value]="createDate()" (input)="createDate.set($any($event.target).value)" required />
+						</div>
+						<div class="field">
+							<label>Notes</label>
+							<input type="text" [value]="createNotes()" (input)="createNotes.set($any($event.target).value)" placeholder="Optional notes" />
+						</div>
+					</div>
+					<div class="modal-actions">
+						<button type="submit" class="blue-btn" [disabled]="loading() || !createTitle().trim()">Log Workout</button>
+						<button type="button" class="cancel-btn" (click)="showCreateModal.set(false)">Cancel</button>
+					</div>
+				</form>
+				<p class="error" *ngIf="error()">{{ error() }}</p>
 			</div>
-			<div class="form-row two-col">
-				<div class="field">
-					<label>Date & Time *</label>
-					  <input type="datetime-local" [value]="createDate()" (input)="createDate.set($any($event.target).value)" required />
-				</div>
-				<div class="field">
-					<label>Notes</label>
-					  <input type="text" [value]="createNotes()" (input)="createNotes.set($any($event.target).value)" placeholder="Optional notes" />
-				</div>
-			</div>
-			<div class="form-actions">
-				<button type="submit" class="create-btn" [disabled]="loading()">Create Workout</button>
-			</div>
-		</form>
-		<p class="error" *ngIf="error()">{{ error() }}</p>
-	</div>
+		</div>
 
 	<!-- Workout Detail -->
 	<div class="workout-detail" *ngIf="workout() as w">
@@ -78,12 +85,15 @@
 							<tr *ngFor="let s of ex.sets; let i = index">
 								<td>{{ i + 1 }}</td>
 								<td>
-									<input type="number" class="set-input" [value]="s.weight" min="0" (blur)="updateSet(ex, s, 'weight', $any($event.target).valueAsNumber)" />
+									<input type="number" class="set-input" [value]="s.weight" min="0"
+									  (input)="s.weight = $any($event.target).valueAsNumber" />
 								</td>
 								<td>
-									<input type="number" class="set-input" [value]="s.reps" min="0" (blur)="updateSet(ex, s, 'reps', $any($event.target).valueAsNumber)" />
+									<input type="number" class="set-input" [value]="s.reps" min="0"
+									  (input)="s.reps = $any($event.target).valueAsNumber" />
 								</td>
 								<td>
+									<button class="action-btn save" (click)="saveSet(ex, s)" title="Save Set">💾</button>
 									<button class="action-btn danger" (click)="removeSet(ex, s)" title="Remove Set">🗑️</button>
 								</td>
 							</tr>
