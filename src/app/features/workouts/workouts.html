@@ -32,7 +32,7 @@
 						<div class="wc-meta">
 							<span>{{ w.exercises.length }} exercises</span>
 							<button class="open-btn" (click)="viewWorkout(w)">Open</button>
-							<button class="open-btn" (click)="startWorkout(w)">Start</button>
+							<button class="open-btn danger" (click)="removeWorkout(w)" [disabled]="loading()">Remove</button>
 						</div>
 					</div>
 				</div>
@@ -73,8 +73,8 @@
 	<!-- Workout Detail -->
 	<div class="workout-detail" *ngIf="workout() as w">
 			<div class="tabs">
-				<button [class.active]="activeTab() === 'recents'" (click)="activeTab.set('recents')">Recents</button>
-				<button [class.active]="activeTab() === 'calendar'" (click)="activeTab.set('calendar')">Calendar</button>
+			<button [class.active]="activeTab() === 'recents'" (click)="activeTab.set('recents')">Recents</button>
+			<button class="ghost-btn" (click)="backToList()" title="Back">Back</button>
 			</div>
 			<ng-container *ngIf="activeTab() === 'recents'">
 				<ng-container *ngIf="workoutsList().length; else noRecents">
@@ -88,7 +88,6 @@
 							<div class="wc-meta">
 								<span>{{ w.exercises.length }} exercises</span>
 								<button class="open-btn" (click)="viewWorkout(w)">Open</button>
-								<button class="open-btn" (click)="startWorkout(w)">Start</button>
 							</div>
 						</div>
 					</div>
@@ -98,30 +97,7 @@
 				</ng-template>
 			</ng-container>
 
-			<ng-container *ngIf="activeTab() === 'calendar'">
-				<div class="calendar-controls">
-					<label for="wdate">Select Date</label>
-					<input id="wdate" type="date" [value]="selectedDate()" (input)="selectedDate.set($any($event.target).value)" />
-					<button class="open-btn" (click)="loadWorkouts()" [disabled]="loading()">Refresh</button>
-				</div>
-				<div class="workouts-grid" *ngIf="workoutsByDate().length; else noDateResults">
-					<div class="workout-card-mini" *ngFor="let w of workoutsByDate()">
-						<div class="wc-header">
-							<h3>{{ w.title }}</h3>
-							<span class="date-chip">{{ w.workoutAt }}</span>
-						</div>
-						<p class="wc-notes" *ngIf="w.notes">{{ w.notes }}</p>
-						<div class="wc-meta">
-							<span>{{ w.exercises.length }} exercises</span>
-							<button class="open-btn" (click)="viewWorkout(w)">Open</button>
-							<button class="open-btn" (click)="startWorkout(w)">Start</button>
-						</div>
-					</div>
-				</div>
-				<ng-template #noDateResults>
-					<p class="empty-hint">No workouts found for the selected date.</p>
-				</ng-template>
-			</ng-container>
+
 
 			<!-- Exercise entry form -->
 			<input type="text" placeholder="Name *" [value]="exName()" (input)="exName.set($any($event.target).value)" />

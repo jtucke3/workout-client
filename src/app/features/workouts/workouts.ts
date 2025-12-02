@@ -128,13 +128,90 @@ export class Workouts {
     this.editNotes.set(w.notes || '');
   }
 
-  backToList(): void {
+  async backToList(): Promise<void> {
+    // Persist any workout title/notes edits and set changes before leaving
+    await this.finalizeWorkoutChanges();
     this.workout.set(null);
     this.loggingMode.set(false);
     this.editTitle.set('');
     this.editNotes.set('');
     // default to recents tab when returning
     this.activeTab.set('recents');
+  }
+
+  private async finalizeWorkoutChanges(): Promise<void> {
+    const w = this.workout();
+    if (!w) return;
+    this.loading.set(true);
+    try {
+      // Update workout title/notes if changed
+      const nextTitle = (this.editTitle().trim() || w.title);
+      const nextNotes = (this.editNotes().trim() || null);
+      if (nextTitle !== w.title || nextNotes !== (w.notes || null)) {
+        const updated = await this.http.put<WorkoutResponseWebVo>(`/api/workouts/${w.id}`,
+          { title: nextTitle, notes: nextNotes, workoutAt: w.workoutAt },
+          { headers: this.headers() }
+        ).toPromise().catch(() => null);
+        if (updated) {
+          this.workout.set(updated);
+          this.workoutsList.set(this.workoutsList().map(x => x.id === updated.id ? updated : x));
+        }
+      }
+
+      // Persist any exercise field edits (name, notes, equipment, bodyPart) if backend supports it
+      const exerciseUpdateOps: Promise<any>[] = [];
+      for (const ex of w.exercises) {
+        exerciseUpdateOps.push(
+          this.http.put(`/api/workouts/${w.id}/exercises/${ex.id}`,
+            { id: ex.id, name: ex.name, notes: ex.notes || '', equipment: ex.equipment || '', bodyPart: ex.bodyPart || '' },
+            { headers: this.headers() }
+          ).toPromise().catch(() => null)
+        );
+      }
+      if (exerciseUpdateOps.length) {
+        await Promise.all(exerciseUpdateOps);
+      }
+
+      // Persist any set edits inline (weight/reps changes)
+      const ops: Promise<any>[] = [];
+      const current = this.workout();
+      if (current) {
+        for (const ex of current.exercises) {
+          for (const s of ex.sets) {
+            ops.push(
+              this.http.put(`/api/workouts/${current.id}/exercises/${ex.id}/sets/${s.setId}`,
+                { setId: s.setId, weight: s.weight, reps: s.reps },
+                { headers: this.headers() }
+              ).toPromise().catch(() => null)
+            );
+          }
+        }
+      }
+      if (ops.length) {
+        await Promise.all(ops);
+      }
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async removeWorkout(w: WorkoutResponseWebVo): Promise<void> {
+    if (!w) return;
+    this.loading.set(true);
+    this.error.set(null);
+    try {
+      await this.http.delete(`/api/workouts/${w.id}`, { headers: this.headers() }).toPromise();
+      // Remove from list
+      this.workoutsList.set(this.workoutsList().filter(x => x.id !== w.id));
+      // If currently viewing this workout, return to list
+      if (this.workout()?.id === w.id) {
+        this.backToList();
+      }
+    } catch (e: any) {
+      this.error.set(e?.message || 'Failed to remove workout');
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   // lifecycle-like init (standalone component, no ngOnInit imported)
