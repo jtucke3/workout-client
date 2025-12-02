@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import {
   FriendActivityWebVo,
   FriendPreviewWebVo,
-  FriendProfileWebVo
+  FriendProfileWebVo,
 } from '../friendsModels/friends-api.models';
 import { AuthUserService } from '../../../shared/services/auth-user.service';
 
@@ -15,99 +15,103 @@ export class FriendsService {
 
   private readonly BASE = '/api/friends';
 
-  /**
-   * Returns the currently logged-in user's id.
-   * Throws if the user is not loaded (should not happen after login).
-   */
   private getCurrentUserId(): string {
-    const current = this.authUser.user(); // signal -> call it
-    console.log('[FriendsService] Current user when calling friends API:', current);
+    // Adjust this to match your AuthUserService API if needed
+    const current = (this.authUser as any)._user
+      ? (this.authUser as any)._user()
+      : (this.authUser as any).user?.();
 
-    if (!current) {
-      throw new Error('Current user is not loaded; cannot use friends API.');
+    const id = current?.id;
+    if (!id) {
+      throw new Error('No current user id available in AuthUserService.');
     }
-    if (!current.id) {
-      throw new Error(
-        'Current user has no id; cannot use friends API. User object: ' +
-          JSON.stringify(current)
-      );
-    }
-    return current.id;
+    return id;
   }
 
-  listFriends(): Promise<FriendPreviewWebVo[]> {
-    const userId = this.getCurrentUserId();
-    return firstValueFrom(
-      this.http.get<FriendPreviewWebVo[]>(this.BASE, {
-        params: { userId }
-      })
-    );
-  }
-
-  search(query: string): Promise<FriendPreviewWebVo[]> {
+  // --- Search users by query ---
+  searchUsers(query: string): Promise<FriendPreviewWebVo[]> {
     const userId = this.getCurrentUserId();
     return firstValueFrom(
       this.http.get<FriendPreviewWebVo[]>(`${this.BASE}/search`, {
-        params: { userId, q: query }
+        params: { userId, q: query },
       })
     );
   }
 
-  sendRequest(targetUserId: string): Promise<void> {
+  // --- My accepted friends ---
+  listFriends(): Promise<FriendPreviewWebVo[]> {
+    const userId = this.getCurrentUserId();
+    return firstValueFrom(
+      this.http.get<FriendPreviewWebVo[]>(this.BASE, { params: { userId } })
+    );
+  }
+
+  // --- Incoming friend requests (people who sent ME a request) ---
+  listIncomingRequests(): Promise<FriendPreviewWebVo[]> {
+    const userId = this.getCurrentUserId();
+    return firstValueFrom(
+      this.http.get<FriendPreviewWebVo[]>(`${this.BASE}/incoming`, {
+        params: { userId },
+      })
+    );
+  }
+
+  // --- Send friend request (or auto-accept if target is public) ---
+  sendFriendRequest(targetUserId: string): Promise<void> {
     const userId = this.getCurrentUserId();
     return firstValueFrom(
       this.http.post<void>(
         `${this.BASE}/request/${targetUserId}`,
-        {},
+        null,
         { params: { userId } }
       )
     );
   }
 
-  acceptRequest(fromUserId: string): Promise<void> {
+  // --- Accept an incoming friend request ---
+  acceptFriendRequest(fromUserId: string): Promise<void> {
     const userId = this.getCurrentUserId();
     return firstValueFrom(
       this.http.post<void>(
         `${this.BASE}/accept/${fromUserId}`,
-        {},
+        null,
         { params: { userId } }
       )
     );
   }
 
+  // --- Remove an existing friend ---
   removeFriend(friendId: string): Promise<void> {
     const userId = this.getCurrentUserId();
     return firstValueFrom(
-      this.http.delete<void>(
-        `${this.BASE}/${friendId}`,
-        { params: { userId } }
-      )
+      this.http.delete<void>(`${this.BASE}/${friendId}`, {
+        params: { userId },
+      })
     );
   }
 
-  getRecentActivity(): Promise<FriendActivityWebVo[]> {
+  // --- Recent activity (placeholder / future dashboard) ---
+  listRecentActivity(): Promise<FriendActivityWebVo[]> {
     const userId = this.getCurrentUserId();
     return firstValueFrom(
-      this.http.get<FriendActivityWebVo[]>(
-        `${this.BASE}/activity`,
-        { params: { userId } }
-      )
+      this.http.get<FriendActivityWebVo[]>(`${this.BASE}/activity`, {
+        params: { userId },
+      })
     );
   }
 
   /**
-   * Get a friend's profile (privacy-aware).
-   * Backend endpoint should enforce:
+   * Friend profile: workouts/goals with privacy handling.
+   * Backend enforces:
    *  - if profilePrivate=false -> canViewDetails=true for everyone
-   *  - if profilePrivate=true -> canViewDetails only if viewer is a friend or same user
+   *  - if profilePrivate=true -> canViewDetails=true only if viewer is a friend or same user
    */
   getFriendProfile(friendId: string): Promise<FriendProfileWebVo> {
     const userId = this.getCurrentUserId();
     return firstValueFrom(
-      this.http.get<FriendProfileWebVo>(
-        `${this.BASE}/profile/${friendId}`,
-        { params: { userId } }
-      )
+      this.http.get<FriendProfileWebVo>(`${this.BASE}/profile/${friendId}`, {
+        params: { userId },
+      })
     );
   }
 }

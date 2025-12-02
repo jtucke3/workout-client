@@ -2,7 +2,11 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Navbar } from '../../../shared/components/navbar/navbar';
-import { FriendGoalSummaryWebVo, FriendProfileWebVo, FriendWorkoutSummaryWebVo } from '../friendsModels/friends-api.models';
+import {
+  FriendGoalSummaryWebVo,
+  FriendProfileWebVo,
+  FriendWorkoutSummaryWebVo,
+} from '../friendsModels/friends-api.models';
 import { FriendsService } from '../friendsService/friends.service';
 
 @Component({
@@ -10,34 +14,42 @@ import { FriendsService } from '../friendsService/friends.service';
   standalone: true,
   imports: [CommonModule, Navbar, RouterModule],
   templateUrl: './friend-profile.html',
-  styleUrl: './friend-profile.scss'
+  styleUrl: './friend-profile.scss',
 })
 export class FriendProfile {
   private route = inject(ActivatedRoute);
   private friendsService = inject(FriendsService);
 
-  profile = signal<FriendProfileWebVo | null>(null);
-  isLoading = signal(false);
-  error = signal<string | null>(null);
+  private _profile = signal<FriendProfileWebVo | null>(null);
+  profile = this._profile.asReadonly();
 
-  async ngOnInit() {
-    const friendId = this.route.snapshot.paramMap.get('id');
-    if (!friendId) {
-      this.error.set('No user specified.');
-      return;
-    }
+  private _isLoading = signal(false);
+  isLoading = this._isLoading.asReadonly();
 
-    this.isLoading.set(true);
-    this.error.set(null);
+  private _error = signal<string | null>(null);
+  error = this._error.asReadonly();
+
+  constructor() {
+    this.route.paramMap.subscribe((params) => {
+      const friendId = params.get('friendId');
+      if (friendId) {
+        this.loadProfile(friendId);
+      }
+    });
+  }
+
+  async loadProfile(friendId: string): Promise<void> {
+    this._isLoading.set(true);
+    this._error.set(null);
 
     try {
-      const data = await this.friendsService.getFriendProfile(friendId);
-      this.profile.set(data);
+      const profile = await this.friendsService.getFriendProfile(friendId);
+      this._profile.set(profile);
     } catch (err) {
-      console.error('Failed to load friend profile', err);
-      this.error.set('Unable to load profile right now.');
+      console.error('Unable to load friend profile', err);
+      this._error.set('Unable to load profile right now.');
     } finally {
-      this.isLoading.set(false);
+      this._isLoading.set(false);
     }
   }
 

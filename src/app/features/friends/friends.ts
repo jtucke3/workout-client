@@ -8,60 +8,74 @@ import { FriendPreviewWebVo } from './friendsModels/friends-api.models';
 
 @Component({
   selector: 'app-friends',
+  standalone: true,
   imports: [CommonModule, Navbar, RouterModule, FormsModule],
   templateUrl: './friends.html',
-  styleUrl: './friends.scss'
+  styleUrl: './friends.scss',
 })
 export class Friends {
   private friendsService = inject(FriendsService);
 
+  // Simple field bound via ngModel
   searchQuery = '';
-  // signals for reactive state
-  isSearching = signal(false);
-  isLoadingFriends = signal(false);
-  searchResults = signal<FriendPreviewWebVo[]>([]);
-  myFriends = signal<FriendPreviewWebVo[]>([]);
-  error = signal<string | null>(null);
 
-  // simple debounce handle for live search
-  private searchDebounceHandle: any = null;
+  // Signals for UI state
+  private _searchResults = signal<FriendPreviewWebVo[]>([]);
+  searchResults = this._searchResults.asReadonly();
 
-  async ngOnInit() {
-    await this.loadFriends();
+  private _myFriends = signal<FriendPreviewWebVo[]>([]);
+  myFriends = this._myFriends.asReadonly();
+
+  private _incomingRequests = signal<FriendPreviewWebVo[]>([]);
+  incomingRequests = this._incomingRequests.asReadonly();
+
+  private _isSearching = signal(false);
+  isSearching = this._isSearching.asReadonly();
+
+  private _isLoadingFriends = signal(false);
+  isLoadingFriends = this._isLoadingFriends.asReadonly();
+
+  private _error = signal<string | null>(null);
+  error = this._error.asReadonly();
+
+  private searchDebounceHandle: any;
+
+  constructor() {
+    this.loadFriendsAndIncoming();
   }
 
-  async loadFriends() {
-    this.isLoadingFriends.set(true);
-    this.error.set(null);
+  // --- Initial load ---
+  async loadFriendsAndIncoming(): Promise<void> {
+    this._isLoadingFriends.set(true);
+    this._error.set(null);
 
     try {
-      const friends = await this.friendsService.listFriends();
-      this.myFriends.set(friends);
+      const [friends, incoming] = await Promise.all([
+        this.friendsService.listFriends(),
+        this.friendsService.listIncomingRequests(),
+      ]);
+      this._myFriends.set(friends);
+      this._incomingRequests.set(incoming);
     } catch (err) {
-      console.error('Failed to load friends', err);
-      this.error.set('Unable to load friends right now.');
+      console.error('Unable to load friends/incoming requests', err);
+      this._error.set('Unable to load friends right now.');
     } finally {
-      this.isLoadingFriends.set(false);
+      this._isLoadingFriends.set(false);
     }
   }
 
-  /**
-   * Called when the search box text changes.
-   * If there are at least 3 characters, we run a debounced search.
-   * If fewer than 3, we clear results.
-   */
-  onSearchQueryChange(value: string) {
-    this.searchQuery = value;
+  // --- Search logic ---
+  onSearchQueryChange(query: string): void {
+    this.searchQuery = query;
 
-    const q = value.trim();
-    if (q.length < 3) {
-      this.searchResults.set([]);
-      return;
-    }
-
-    // debounce 300ms
     if (this.searchDebounceHandle) {
       clearTimeout(this.searchDebounceHandle);
+    }
+
+    // Only search if at least 3 characters
+    if (!query || query.trim().length < 3) {
+      this._searchResults.set([]);
+      return;
     }
 
     this.searchDebounceHandle = setTimeout(() => {
@@ -69,68 +83,74 @@ export class Friends {
     }, 300);
   }
 
-  /**
-   * Explicit search (e.g., when user hits Enter or clicks the button).
-   * Still respects the 3-character minimum.
-   */
-  async runSearch() {
+  async runSearch(): Promise<void> {
     const q = this.searchQuery.trim();
     if (q.length < 3) {
-      this.searchResults.set([]);
+      this._searchResults.set([]);
       return;
     }
 
-    this.isSearching.set(true);
-    this.error.set(null);
+    this._isSearching.set(true);
+    this._error.set(null);
 
     try {
-      const results = await this.friendsService.search(q);
-      this.searchResults.set(results);
+      const results = await this.friendsService.searchUsers(q);
+      this._searchResults.set(results);
     } catch (err) {
-      console.error('Search failed', err);
-      this.error.set('Search failed. Please try again.');
+      console.error('Friend search failed', err);
+      this._error.set('Unable to search users right now.');
+      this._searchResults.set([]);
     } finally {
-      this.isSearching.set(false);
+      this._isSearching.set(false);
     }
   }
 
-  async sendRequest(user: FriendPreviewWebVo) {
+  // --- Friend actions ---
+
+  async sendRequest(user: FriendPreviewWebVo): Promise<void> {
     try {
-      await this.friendsService.sendRequest(user.id);
-      await this.runSearch();
-      await this.loadFriends();
+      await this.friendsService.sendFriendRequest(user.id);
+      // Re-run search + refresh friends/incoming
+      await Promise.all([this.runSearch(), this.loadFriendsAndIncoming()]);
     } catch (err) {
       console.error('Unable to send friend request', err);
-      this.error.set('Unable to send friend request.');
+      this._error.set('Unable to send friend request.');
     }
   }
 
-  async acceptRequest(user: FriendPreviewWebVo) {
+  // Accept is now only used for incoming requests, NOT search results
+  async acceptRequest(user: FriendPreviewWebVo): Promise<void> {
     try {
-      await this.friendsService.acceptRequest(user.id);
+      await this.friendsService.acceptFriendRequest(user.id);
+      await this.loadFriendsAndIncoming();
       await this.runSearch();
-      await this.loadFriends();
     } catch (err) {
       console.error('Unable to accept friend request', err);
-      this.error.set('Unable to accept friend request.');
+      this._error.set('Unable to accept friend request.');
     }
   }
 
-  async removeFriend(user: FriendPreviewWebVo) {
+  async removeFriend(friend: FriendPreviewWebVo): Promise<void> {
+    if (!confirm(`Remove ${friend.displayName} from your friends?`)) {
+      return;
+    }
+
     try {
-      await this.friendsService.removeFriend(user.id);
-      await this.loadFriends();
+      await this.friendsService.removeFriend(friend.id);
+      await this.loadFriendsAndIncoming();
+      await this.runSearch();
     } catch (err) {
       console.error('Unable to remove friend', err);
-      this.error.set('Unable to remove friend.');
+      this._error.set('Unable to remove friend.');
     }
   }
 
-  // helpers for template
+  // --- Small helpers for template ---
   isAlreadyFriend(user: FriendPreviewWebVo): boolean {
     return !!user.friend;
   }
 
+  // isPending here is interpreted as: "I have sent a request to this user"
   isPending(user: FriendPreviewWebVo): boolean {
     return !!user.pending && !user.friend;
   }

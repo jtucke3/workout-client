@@ -31,10 +31,7 @@
     </div>
 
     <!-- SEARCH RESULTS -->
-    <section
-      class="friends-results"
-      *ngIf="searchResults().length > 0"
-    >
+    <section class="friends-results" *ngIf="searchResults().length > 0">
       <div class="friends-results-header">
         <h3>Search Results</h3>
         <span class="count">{{ searchResults().length }} users</span>
@@ -45,7 +42,7 @@
           <div class="friend-info">
             <a
               class="friend-name-link"
-              [routerLink]="['/friends', user.id]"
+              [routerLink]="['/friend-profile', user.id]"
             >
               {{ user.displayName }}
             </a>
@@ -61,22 +58,54 @@
               Add Friend
             </button>
 
-            <!-- Pending relationship -> let this user accept it -->
+            <!-- Pending request that *I* sent -> show non-clickable pill -->
+            <span
+              class="status-pill pending"
+              *ngIf="isPending(user) && !isAlreadyFriend(user)"
+            >
+              Pending
+            </span>
+
+            <!-- Already friends -->
+            <span class="status-pill friend" *ngIf="isAlreadyFriend(user)">
+              Friends
+            </span>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- INCOMING FRIEND REQUESTS -->
+    <section
+      class="friends-incoming"
+      *ngIf="incomingRequests().length > 0"
+    >
+      <div class="friends-list-header">
+        <h3>Incoming Friend Requests</h3>
+        <span class="count">
+          {{ incomingRequests().length }} pending
+        </span>
+      </div>
+
+      <ul>
+        <li *ngFor="let requester of incomingRequests()">
+          <div class="friend-info">
+            <a
+              class="friend-name-link"
+              [routerLink]="['/friend-profile', requester.id]"
+            >
+              {{ requester.displayName }}
+            </a>
+          </div>
+
+          <div class="friend-actions">
+            <!-- Receiver sees Accept -->
             <button
               class="blue-btn"
-              *ngIf="isPending(user) && !isAlreadyFriend(user)"
-              (click)="acceptRequest(user)"
+              (click)="acceptRequest(requester)"
             >
               Accept
             </button>
-
-            <!-- Already friends -->
-            <span
-              class="status-pill friend"
-              *ngIf="isAlreadyFriend(user)"
-            >
-              Friends
-            </span>
           </div>
         </li>
       </ul>
@@ -107,7 +136,7 @@
           <div class="friend-info">
             <a
               class="friend-name-link"
-              [routerLink]="['/friends', friend.id]"
+              [routerLink]="['/friend-profile', friend.id]"
             >
               {{ friend.displayName }}
             </a>
