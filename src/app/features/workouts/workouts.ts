@@ -44,9 +44,7 @@ export class Workouts {
   private headers(): HttpHeaders {
     const token = typeof window !== 'undefined' ? (localStorage.getItem('token') || sessionStorage.getItem('token')) : null;
     const init: Record<string, string> = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
-    const uid = this.userId();
     if (token) init['Authorization'] = `Bearer ${token}`;
-    if (uid) init['X-User-Id'] = uid; // add explicit user id header if backend expects it
     return new HttpHeaders(init);
   }
 
@@ -84,7 +82,6 @@ export class Workouts {
   async addExercise(): Promise<void> {
     const w = this.workout();
     if (!w) return;
-    const uid = this.userId();
     if (!this.exName().trim()) {
       this.error.set('Exercise name required');
       return;
@@ -92,17 +89,13 @@ export class Workouts {
     this.loading.set(true);
     this.error.set(null);
     const body = {
-      // backend WebVo shows workoutId field; include it to satisfy request mapping
-      workoutId: w.id,
       name: this.exName().trim(),
-      notes: this.exNotes().trim() || null,
-      equipment: this.exEquipment().trim() || null,
-      bodyPart: this.exBodyPart().trim() || null
+      notes: this.exNotes().trim() || '',
+      equipment: this.exEquipment().trim() || '',
+      bodyPart: this.exBodyPart().trim() || ''
     };
     try {
-      // include userId as query param if available (some endpoints may require it for authorization)
-      const url = uid ? `/api/workouts/${w.id}/exercises?userId=${encodeURIComponent(uid)}` : `/api/workouts/${w.id}/exercises`;
-      const updated = await this.http.post<WorkoutResponseWebVo>(url, body, { headers: this.headers() }).toPromise();
+      const updated = await this.http.post<WorkoutResponseWebVo>(`/api/workouts/${w.id}/exercises`, body, { headers: this.headers() }).toPromise();
       if (updated) this.workout.set(updated);
       this.exName.set(''); this.exEquipment.set(''); this.exBodyPart.set(''); this.exNotes.set('');
     } catch (e: any) {
@@ -115,12 +108,10 @@ export class Workouts {
   async addSet(ex: ExerciseResponseWebVo): Promise<void> {
     const w = this.workout();
     if (!w) return;
-    const uid = this.userId();
     this.loading.set(true);
     this.error.set(null);
     try {
-      const url = uid ? `/api/workouts/${w.id}/exercises/${ex.id}/sets?userId=${encodeURIComponent(uid)}` : `/api/workouts/${w.id}/exercises/${ex.id}/sets`;
-      const updatedEx = await this.http.post<ExerciseResponseWebVo>(url, {}, { headers: this.headers() }).toPromise();
+      const updatedEx = await this.http.post<ExerciseResponseWebVo>(`/api/workouts/${w.id}/exercises/${ex.id}/sets`, {}, { headers: this.headers() }).toPromise();
       if (updatedEx) this.replaceExercise(updatedEx);
     } catch (e: any) {
       this.error.set(e?.message || 'Failed to add set');
@@ -132,12 +123,10 @@ export class Workouts {
   async removeSet(ex: ExerciseResponseWebVo, set: SetResponseWebVo): Promise<void> {
     const w = this.workout();
     if (!w) return;
-    const uid = this.userId();
     this.loading.set(true);
     this.error.set(null);
     try {
-      const url = uid ? `/api/workouts/${w.id}/exercises/${ex.id}/sets?userId=${encodeURIComponent(uid)}` : `/api/workouts/${w.id}/exercises/${ex.id}/sets`;
-      const updatedEx = await this.http.delete<ExerciseResponseWebVo>(url, { headers: this.headers(), body: { setId: set.setId } }).toPromise();
+      const updatedEx = await this.http.delete<ExerciseResponseWebVo>(`/api/workouts/${w.id}/exercises/${ex.id}/sets`, { headers: this.headers(), body: { setId: set.setId } }).toPromise();
       if (updatedEx) this.replaceExercise(updatedEx);
     } catch (e: any) {
       this.error.set(e?.message || 'Failed to remove set');
@@ -149,12 +138,10 @@ export class Workouts {
   async updateSet(ex: ExerciseResponseWebVo, set: SetResponseWebVo, field: 'weight' | 'reps', value: number): Promise<void> {
     const w = this.workout();
     if (!w) return;
-    const uid = this.userId();
     const original = { ...set };
     (set as any)[field] = value;
     try {
-      const url = uid ? `/api/workouts/${w.id}/exercises/${ex.id}/sets/${set.setId}?userId=${encodeURIComponent(uid)}` : `/api/workouts/${w.id}/exercises/${ex.id}/sets/${set.setId}`;
-      await this.http.put(url, { setId: set.setId, weight: set.weight, reps: set.reps }, { headers: this.headers() }).toPromise();
+      await this.http.put(`/api/workouts/${w.id}/exercises/${ex.id}/sets/${set.setId}`, { setId: set.setId, weight: set.weight, reps: set.reps }, { headers: this.headers() }).toPromise();
     } catch (e: any) {
       Object.assign(set, original);
       this.error.set(e?.message || 'Failed to update set');
