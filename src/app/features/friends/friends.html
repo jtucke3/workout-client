@@ -1,91 +1,127 @@
 <app-navbar></app-navbar>
 
 <main class="friends-page">
-    <section class="friends-card">
-        <header class="friends-header">
-            <h2>Friends</h2>
-            <p>Search for other Redbird Fitness users and manage your connections.</p>
-        </header>
+  <section class="friends-card">
+    <header class="friends-header">
+      <h2>Friends</h2>
+      <p>Search for other Redbird Fitness users and manage your connections.</p>
+    </header>
 
-        <!-- SEARCH -->
-        <div class="friends-search">
-            <input type="text" placeholder="Search by name or email" [(ngModel)]="searchQuery"
-                (keyup.enter)="runSearch()" />
-            <button class="blue-btn" (click)="runSearch()" [disabled]="isSearching()">
-                {{ isSearching() ? 'Searching…' : 'Search' }}
+    <!-- SEARCH -->
+    <div class="friends-search">
+      <input
+        type="text"
+        placeholder="Search by name or email (min 3 characters)"
+        [(ngModel)]="searchQuery"
+        (ngModelChange)="onSearchQueryChange($event)"
+        (keyup.enter)="runSearch()"
+      />
+      <button
+        class="blue-btn"
+        (click)="runSearch()"
+        [disabled]="isSearching() || searchQuery.trim().length < 3"
+      >
+        {{ isSearching() ? 'Searching…' : 'Search' }}
+      </button>
+    </div>
+
+    <!-- ERROR -->
+    <div class="friends-error" *ngIf="error()">
+      {{ error() }}
+    </div>
+
+    <!-- SEARCH RESULTS -->
+    <section
+      class="friends-results"
+      *ngIf="searchResults().length > 0"
+    >
+      <div class="friends-results-header">
+        <h3>Search Results</h3>
+        <span class="count">{{ searchResults().length }} users</span>
+      </div>
+
+      <ul>
+        <li *ngFor="let user of searchResults()">
+          <div class="friend-info">
+            <a
+              class="friend-name-link"
+              [routerLink]="['/friends', user.id]"
+            >
+              {{ user.displayName }}
+            </a>
+          </div>
+
+          <div class="friend-actions">
+            <!-- No relationship yet -> send request -->
+            <button
+              class="blue-outline-btn"
+              *ngIf="!isAlreadyFriend(user) && !isPending(user)"
+              (click)="sendRequest(user)"
+            >
+              Add Friend
             </button>
-        </div>
 
-        <!-- ERROR -->
-        <div class="friends-error" *ngIf="error()">
-            {{ error() }}
-        </div>
+            <!-- Pending relationship -> let this user accept it -->
+            <button
+              class="blue-btn"
+              *ngIf="isPending(user) && !isAlreadyFriend(user)"
+              (click)="acceptRequest(user)"
+            >
+              Accept
+            </button>
 
-        <!-- SEARCH RESULTS -->
-        <section class="friends-results" *ngIf="searchResults().length > 0">
-            <div class="friends-results-header">
-                <h3>Search Results</h3>
-                <span class="count">{{ searchResults().length }} users</span>
-            </div>
-
-            <ul>
-                <li *ngFor="let user of searchResults()">
-                    <div class="friend-info">
-                        <div class="friend-name">{{ user.displayName }}</div>
-                    </div>
-
-                    <div class="friend-actions">
-                        <!-- No relationship yet -> send request -->
-                        <button class="blue-outline-btn" *ngIf="!isAlreadyFriend(user) && !isPending(user)"
-                            (click)="sendRequest(user)">
-                            Add Friend
-                        </button>
-
-                        <!-- There is a pending relationship -> let the user accept it -->
-                        <button class="blue-btn" *ngIf="isPending(user) && !isAlreadyFriend(user)"
-                            (click)="acceptRequest(user)">
-                            Accept
-                        </button>
-
-                        <!-- Already friends -->
-                        <span class="status-pill friend" *ngIf="isAlreadyFriend(user)">
-                            Friends
-                        </span>
-                    </div>
-
-                </li>
-            </ul>
-        </section>
-
-        <!-- FRIENDS LIST -->
-        <section class="friends-list">
-            <div class="friends-list-header">
-                <h3>Your Friends</h3>
-                <span class="count" *ngIf="myFriends().length > 0">
-                    {{ myFriends().length }} total
-                </span>
-            </div>
-
-            <div class="friends-loading" *ngIf="isLoadingFriends()">
-                Loading friends…
-            </div>
-
-            <p class="friends-empty" *ngIf="!isLoadingFriends() && myFriends().length === 0">
-                You don't have any friends yet. Use the search above to add someone.
-            </p>
-
-            <ul *ngIf="myFriends().length > 0">
-                <li *ngFor="let friend of myFriends()">
-                    <div class="friend-info">
-                        <div class="friend-name">{{ friend.displayName }}</div>
-                    </div>
-                    <div class="friend-actions">
-                        <button class="danger-outline-btn" (click)="removeFriend(friend)">
-                            Remove
-                        </button>
-                    </div>
-                </li>
-            </ul>
-        </section>
+            <!-- Already friends -->
+            <span
+              class="status-pill friend"
+              *ngIf="isAlreadyFriend(user)"
+            >
+              Friends
+            </span>
+          </div>
+        </li>
+      </ul>
     </section>
+
+    <!-- FRIENDS LIST -->
+    <section class="friends-list">
+      <div class="friends-list-header">
+        <h3>Your Friends</h3>
+        <span class="count" *ngIf="myFriends().length > 0">
+          {{ myFriends().length }} total
+        </span>
+      </div>
+
+      <div class="friends-loading" *ngIf="isLoadingFriends()">
+        Loading friends…
+      </div>
+
+      <p
+        class="friends-empty"
+        *ngIf="!isLoadingFriends() && myFriends().length === 0"
+      >
+        You don't have any friends yet. Use the search above to add someone.
+      </p>
+
+      <ul *ngIf="myFriends().length > 0">
+        <li *ngFor="let friend of myFriends()">
+          <div class="friend-info">
+            <a
+              class="friend-name-link"
+              [routerLink]="['/friends', friend.id]"
+            >
+              {{ friend.displayName }}
+            </a>
+          </div>
+          <div class="friend-actions">
+            <button
+              class="danger-outline-btn"
+              (click)="removeFriend(friend)"
+            >
+              Remove
+            </button>
+          </div>
+        </li>
+      </ul>
+    </section>
+  </section>
 </main>

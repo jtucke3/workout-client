@@ -1,0 +1,79 @@
+<app-navbar></app-navbar>
+
+<main class="friend-profile-page" *ngIf="!isLoading() || profile()">
+  <section class="friend-profile-card">
+    <header class="friend-profile-header">
+      <h2>{{ profile()?.displayName || 'User' }}</h2>
+
+      <span
+        class="privacy-pill"
+        [class.private]="profile()?.profilePrivate"
+        *ngIf="profile()"
+      >
+        {{ profile()?.profilePrivate ? 'Private account' : 'Public account' }}
+      </span>
+    </header>
+
+    <div class="friend-profile-body">
+      <div *ngIf="isLoading()" class="friend-profile-loading">
+        Loading profile…
+      </div>
+
+      <div *ngIf="error() && !isLoading()" class="friend-profile-error">
+        {{ error() }}
+      </div>
+
+      <!-- PRIVATE VIEW (like Instagram "This account is private") -->
+      <section
+        *ngIf="profile() && !profile()?.canViewDetails"
+        class="private-overlay"
+      >
+        <p class="private-title">This account is private.</p>
+        <p class="private-caption">
+          Follow or add this user as a friend to see their workouts and goals.
+        </p>
+      </section>
+
+      <!-- FULL VIEW (workouts + goals) -->
+      <section
+        class="friend-sections"
+        *ngIf="profile() && profile()?.canViewDetails"
+      >
+        <div class="friend-section">
+          <h3>Recent Workouts</h3>
+          <p *ngIf="workouts().length === 0" class="empty-message">
+            No workouts to show yet.
+          </p>
+          <ul *ngIf="workouts().length > 0">
+            <li *ngFor="let w of workouts()">
+              <div class="item-name">{{ w.name }}</div>
+              <div class="item-meta">
+                {{ w.performedAt | date: 'mediumDate' }}
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="friend-section">
+          <h3>Current Goals</h3>
+          <p *ngIf="goals().length === 0" class="empty-message">
+            No goals to show yet.
+          </p>
+          <ul *ngIf="goals().length > 0">
+            <li *ngFor="let g of goals()">
+              <div class="item-name">{{ g.title }}</div>
+              <div class="item-meta">
+                <span *ngIf="g.targetDate">
+                  Target: {{ g.targetDate | date: 'mediumDate' }}
+                </span>
+                <span *ngIf="g.progressPercent != null">
+                  • {{ g.progressPercent }}%
+                </span>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </section>
+    </div>
+  </section>
+</main>

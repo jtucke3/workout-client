@@ -3,7 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import {
   FriendActivityWebVo,
-  FriendPreviewWebVo
+  FriendPreviewWebVo,
+  FriendProfileWebVo
 } from '../friendsModels/friends-api.models';
 import { AuthUserService } from '../../../shared/services/auth-user.service';
 
@@ -89,6 +90,22 @@ export class FriendsService {
     return firstValueFrom(
       this.http.get<FriendActivityWebVo[]>(
         `${this.BASE}/activity`,
+        { params: { userId } }
+      )
+    );
+  }
+
+  /**
+   * Get a friend's profile (privacy-aware).
+   * Backend endpoint should enforce:
+   *  - if profilePrivate=false -> canViewDetails=true for everyone
+   *  - if profilePrivate=true -> canViewDetails only if viewer is a friend or same user
+   */
+  getFriendProfile(friendId: string): Promise<FriendProfileWebVo> {
+    const userId = this.getCurrentUserId();
+    return firstValueFrom(
+      this.http.get<FriendProfileWebVo>(
+        `${this.BASE}/profile/${friendId}`,
         { params: { userId } }
       )
     );

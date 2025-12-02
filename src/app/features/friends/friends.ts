@@ -23,6 +23,9 @@ export class Friends {
   myFriends = signal<FriendPreviewWebVo[]>([]);
   error = signal<string | null>(null);
 
+  // simple debounce handle for live search
+  private searchDebounceHandle: any = null;
+
   async ngOnInit() {
     await this.loadFriends();
   }
@@ -42,9 +45,37 @@ export class Friends {
     }
   }
 
+  /**
+   * Called when the search box text changes.
+   * If there are at least 3 characters, we run a debounced search.
+   * If fewer than 3, we clear results.
+   */
+  onSearchQueryChange(value: string) {
+    this.searchQuery = value;
+
+    const q = value.trim();
+    if (q.length < 3) {
+      this.searchResults.set([]);
+      return;
+    }
+
+    // debounce 300ms
+    if (this.searchDebounceHandle) {
+      clearTimeout(this.searchDebounceHandle);
+    }
+
+    this.searchDebounceHandle = setTimeout(() => {
+      this.runSearch();
+    }, 300);
+  }
+
+  /**
+   * Explicit search (e.g., when user hits Enter or clicks the button).
+   * Still respects the 3-character minimum.
+   */
   async runSearch() {
     const q = this.searchQuery.trim();
-    if (!q) {
+    if (q.length < 3) {
       this.searchResults.set([]);
       return;
     }
