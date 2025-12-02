@@ -3,14 +3,14 @@
 <main class="workouts-content">
 	<!-- Header -->
 	<div class="workouts-header" *ngIf="!workout()">
-		<h1>🏋️ Workouts</h1>
+		<h1> Workouts</h1>
 		<div class="meta">
 		  <button class="refresh-btn" (click)="loadWorkouts()" [disabled]="loading()">Refresh</button>
 		</div>
 	</div>
 	<div class="workouts-header" *ngIf="workout()">
-		<h1 *ngIf="!loggingMode()">🏋️ Workout</h1>
-		<h1 *ngIf="loggingMode()">📝 Logging Workout</h1>
+		<h1 *ngIf="!loggingMode()"> Workout</h1>
+		<h1 *ngIf="loggingMode()"> Logging Workout</h1>
 		<div class="meta" *ngIf="workout() as w">
 			<span class="timestamp">{{ w.workoutAt }}</span>
 		</div>
