@@ -36,7 +36,7 @@
     <div class="modal-card">
       <h3>{{ editingIndex !== null ? 'Edit Meal' : 'Add a Meal' }}</h3>
       <input [ngModel]="newMealName()" placeholder="Meal Name" (ngModelChange)="newMealName.set($event)" />
-      <input type="number" [ngModel]="newMealCalories()" placeholder="Calories" (ngModelChange)="newMealCalories.set($event)" />
+      <input type="number" [ngModel]="newMealCalories()" placeholder="Calories" (ngModelChange)="newMealCalories.set($event === '' ? 0 : +$event)" />
       <textarea [ngModel]="newMealNotes()" placeholder="Notes (optional)" (ngModelChange)="newMealNotes.set($event)"></textarea>
 
       <div class="modal-actions">
