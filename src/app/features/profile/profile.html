@@ -37,6 +37,9 @@
     <h2 class="card-title">Account Security</h2>
     <p class="card-subtitle">Keep your account protected with strong security settings.</p>
 
+    <div *ngIf="passwordChangeSuccess()" class="alert success-alert">{{ passwordChangeSuccess() }}</div>
+    <div *ngIf="passwordChangeError()" class="alert error-alert">{{ passwordChangeError() }}</div>
+
     <div class="security-actions">
       <button type="button" class="pill-button pill-primary" (click)="openPasswordModal()">Change Password</button>
       <button type="button" class="pill-button pill-secondary">Manage 2FA</button>
@@ -92,6 +95,8 @@
           class="modal-input"
           autocomplete="new-password"
         />
+
+        <div class="inline-hint">Use at least 8 characters with a mix of letters, numbers, and symbols.</div>
 
         <div class="modal-actions">
           <button type="button" class="pill-button pill-secondary" (click)="closePasswordModal()">Cancel</button>

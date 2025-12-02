@@ -1,3 +1,153 @@
 <app-navbar></app-navbar>
 
-<p>workouts works!</p>
+<main class="workouts-content">
+	<!-- Header -->
+	<div class="workouts-header" *ngIf="!workout()">
+		<h1>🏋️ Workouts</h1>
+		<div class="meta">
+		  <button class="refresh-btn" (click)="loadWorkouts()" [disabled]="loading()">Refresh</button>
+		</div>
+	</div>
+	<div class="workouts-header" *ngIf="workout()">
+		<h1 *ngIf="!loggingMode()">🏋️ Workout</h1>
+		<h1 *ngIf="loggingMode()">📝 Logging Workout</h1>
+		<div class="meta" *ngIf="workout() as w">
+			<span class="timestamp">{{ w.workoutAt }}</span>
+		</div>
+	</div>
+
+		<!-- Floating Log Workout Button -->
+		<button class="add-workout-btn" (click)="showCreateModal.set(true)">Log Workout</button>
+
+		<!-- Workouts List -->
+		<div class="workouts-list" *ngIf="!workout()">
+			<ng-container *ngIf="workoutsList().length; else emptyList">
+				<div class="workouts-grid">
+					<div class="workout-card-mini" *ngFor="let w of workoutsList()">
+						<div class="wc-header">
+							<h3>{{ w.title }}</h3>
+							<span class="date-chip">{{ w.workoutAt }}</span>
+						</div>
+						<p class="wc-notes" *ngIf="w.notes">{{ w.notes }}</p>
+						<div class="wc-meta">
+							<span>{{ w.exercises.length }} exercises</span>
+							<button class="open-btn" (click)="viewWorkout(w)">Open</button>
+						</div>
+					</div>
+				</div>
+			</ng-container>
+			<ng-template #emptyList>
+				<p class="empty-hint">No workouts yet. Use Log Workout to create one.</p>
+			</ng-template>
+		</div>
+
+		<!-- Create Workout Modal -->
+		<div class="modal-backdrop" *ngIf="showCreateModal()">
+			<div class="modal-card">
+				<h3>Log Workout</h3>
+				<form (ngSubmit)="createWorkout()" class="workout-form">
+					<div class="form-row">
+						<label>Title *</label>
+						<input type="text" [value]="createTitle()" (input)="createTitle.set($any($event.target).value)" required placeholder="Push Day" />
+					</div>
+					<div class="form-row two-col">
+						<div class="field">
+							<label>Date & Time *</label>
+							<input type="datetime-local" [value]="createDate()" (input)="createDate.set($any($event.target).value)" required />
+						</div>
+						<div class="field">
+							<label>Notes</label>
+							<input type="text" [value]="createNotes()" (input)="createNotes.set($any($event.target).value)" placeholder="Optional notes" />
+						</div>
+					</div>
+					<div class="modal-actions">
+						<button type="submit" class="blue-btn" [disabled]="loading() || !createTitle().trim()">Log Workout</button>
+						<button type="button" class="cancel-btn" (click)="showCreateModal.set(false)">Cancel</button>
+					</div>
+				</form>
+				<p class="error" *ngIf="error()">{{ error() }}</p>
+			</div>
+		</div>
+
+	<!-- Workout Detail -->
+	<div class="workout-detail" *ngIf="workout() as w">
+		<div class="workout-header-card">
+			<h2>{{ w.title }}</h2>
+			<button class="back-btn" (click)="backToList()">← Back</button>
+			<p class="notes" *ngIf="w.notes">{{ w.notes }}</p>
+			<div class="logging-hint" *ngIf="loggingMode()">Rapid logging mode: add exercises and sets quickly.</div>
+		</div>
+
+		<!-- Add Exercise Card -->
+		<div class="exercise-form-card">
+			<h3>Add Exercise</h3>
+			<div class="exercise-form-grid">
+				<input type="text" placeholder="Name *" [value]="exName()" (input)="exName.set($any($event.target).value)" />
+				<input type="text" placeholder="Equipment" [value]="exEquipment()" (input)="exEquipment.set($any($event.target).value)" />
+				<input type="text" placeholder="Body Part" [value]="exBodyPart()" (input)="exBodyPart.set($any($event.target).value)" />
+				<input type="text" placeholder="Notes" [value]="exNotes()" (input)="exNotes.set($any($event.target).value)" />
+				<button class="add-ex-btn" (click)="addExercise()" [disabled]="loading() || !exName().trim()">➕ Add Exercise</button>
+			</div>
+		</div>
+
+		<!-- Exercises Grid -->
+		<div class="exercises-grid" *ngIf="w.exercises.length; else emptyExercises">
+			<div class="exercise-card" *ngFor="let ex of w.exercises">
+				<div class="exercise-header">
+					<div class="title-group">
+						<h4>{{ ex.name }}</h4>
+						<span class="badge" *ngIf="ex.bodyPart">{{ ex.bodyPart }}</span>
+						<span class="badge alt" *ngIf="ex.equipment">{{ ex.equipment }}</span>
+					</div>
+					<div class="exercise-actions">
+						<button class="action-btn" (click)="addSet(ex)" title="Add Set">➕</button>
+					</div>
+				</div>
+				<p class="ex-notes" *ngIf="ex.notes">{{ ex.notes }}</p>
+
+				<!-- Quick Add Set Row (logging mode) -->
+				<div class="quick-add-set" *ngIf="loggingMode()">
+					<input type="number" min="0" placeholder="Weight" [value]="pendingSetInputs()[ex.id]?.weight || ''" (input)="setPendingSetValue(ex.id,'weight',$any($event.target).valueAsNumber)" (keyup.enter)="quickAddSet(ex)" />
+					<input type="number" min="0" placeholder="Reps" [value]="pendingSetInputs()[ex.id]?.reps || ''" (input)="setPendingSetValue(ex.id,'reps',$any($event.target).valueAsNumber)" (keyup.enter)="quickAddSet(ex)" />
+					<button class="quick-add-btn" (click)="quickAddSet(ex)" [disabled]="loading()">Add Set</button>
+				</div>
+				<div class="sets-wrapper" *ngIf="ex.sets.length; else noSetsTemplate">
+					<table class="sets-table">
+						<thead>
+							<tr><th>#</th><th>Weight</th><th>Reps</th><th></th></tr>
+						</thead>
+						<tbody>
+							<tr *ngFor="let s of ex.sets; let i = index">
+								<td>{{ i + 1 }}</td>
+								<td>
+									<input type="number" class="set-input" [value]="s.weight" min="0"
+									  (input)="s.weight = $any($event.target).valueAsNumber" />
+								</td>
+								<td>
+									<input type="number" class="set-input" [value]="s.reps" min="0"
+									  (input)="s.reps = $any($event.target).valueAsNumber" />
+								</td>
+								<td>
+									<button class="action-btn save" (click)="saveSet(ex, s)" title="Save Set">💾</button>
+									<button class="action-btn danger" (click)="removeSet(ex, s)" title="Remove Set">🗑️</button>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<ng-template #noSetsTemplate>
+					<p class="placeholder">No sets yet. Click ➕ to add.</p>
+				</ng-template>
+			</div>
+		</div>
+		<ng-template #emptyExercises>
+			<div class="empty-state">
+				<div class="empty-icon">🏋️</div>
+				<h2>No Exercises Yet</h2>
+				<p>Add your first exercise using the form above.</p>
+			</div>
+		</ng-template>
+
+		<p class="error" *ngIf="error()">{{ error() }}</p>
+	</div>
+</main>

@@ -25,6 +25,8 @@ export class Profile implements OnInit {
   isLoading = signal(true);
   error = signal<string | null>(null);
   profile = signal<UserProfile | null>(null);
+  passwordChangeSuccess = signal<string | null>(null);
+  passwordChangeError = signal<string | null>(null);
 
   showNameModal = false;
   showPasswordModal = false;
@@ -116,10 +118,23 @@ export class Profile implements OnInit {
     }
 
     try {
-      await this.profileService.changePassword(currentTrimmed, newTrimmed);
-      // You might later show a toast or success banner here.
+      if (currentTrimmed === newTrimmed) {
+        this.passwordChangeError.set('New password must be different from current password.');
+        return;
+      }
+
+      const response = await this.profileService.changePassword(currentTrimmed, newTrimmed);
+      if (response?.success) {
+        this.passwordChangeSuccess.set(response.message || 'Password changed successfully.');
+        this.passwordChangeError.set(null);
+      } else {
+        this.passwordChangeError.set(response?.message || 'Failed to change password.');
+        this.passwordChangeSuccess.set(null);
+      }
     } catch (e) {
       console.error('Change password failed', e);
+      this.passwordChangeError.set('An unexpected error occurred changing password.');
+      this.passwordChangeSuccess.set(null);
     } finally {
       this.closePasswordModal();
     }

@@ -3,11 +3,39 @@
 <main class="meals-wrapper">
   <!-- Calorie Tracking Bar -->
   <section class="calorie-card">
-    <h2>Calories Today</h2>
-    <div class="calorie-bar">
-      <div class="calorie-fill" [style.width.%]="caloriesPercent"></div>
+    <div class="calorie-header">
+      <div class="calorie-left">
+        <h2>Calories Today</h2>
+        <span class="remaining-large" [class.over]="goalMet">
+          <ng-container *ngIf="!goalMet; else overLargeTpl">Remaining: {{ caloriesRemaining }} kcal</ng-container>
+          <ng-template #overLargeTpl>Over by: {{ (caloriesConsumed() - calorieGoal) }} kcal</ng-template>
+        </span>
+      </div>
+
+      <div class="calorie-controls">
+        <span class="percent-chip" [class.goal-met]="goalMet">{{ caloriesPercent | number:'1.0-0' }}%</span>
+        <button class="set-goal-btn" *ngIf="!showGoalEditor()" (click)="openGoalEditor()">Set Goal (in progress)</button>
+      </div>
     </div>
-    <p class="calorie-info">{{ caloriesConsumed() }} / {{ calorieGoal }} kcal</p>
+
+    <div class="goal-editor" *ngIf="showGoalEditor()">
+      <input type="number" min="1" [ngModel]="goalInput()" (ngModelChange)="goalInput.set($event === '' ? null : +$event)" placeholder="Daily goal (kcal)" />
+      <div class="editor-actions">
+        <button class="blue-btn" (click)="saveGoal()">Save</button>
+        <button class="cancel-btn" (click)="cancelGoalEdit()">Cancel</button>
+      </div>
+    </div>
+
+    <div class="calorie-bar">
+      <div class="calorie-fill" [ngClass]="{ 'goal-met': goalMet }" [style.width.%]="caloriesPercent"></div>
+    </div>
+
+    <div class="calorie-meta">
+      <p class="calorie-info">{{ caloriesConsumed() }} / {{ calorieGoal }} kcal</p>
+      <div class="goal-banner" *ngIf="goalMet">
+        <span>🎉 Goal reached! Great job!</span>
+      </div>
+    </div>
   </section>
 
   <!-- Meals List -->
@@ -36,7 +64,7 @@
     <div class="modal-card">
       <h3>{{ editingIndex !== null ? 'Edit Meal' : 'Add a Meal' }}</h3>
       <input [ngModel]="newMealName()" placeholder="Meal Name" (ngModelChange)="newMealName.set($event)" />
-      <input type="number" [ngModel]="newMealCalories()" placeholder="Calories" (ngModelChange)="newMealCalories.set($event)" />
+      <input type="number" [ngModel]="newMealCalories()" placeholder="Calories" (ngModelChange)="newMealCalories.set($event === '' ? 0 : +$event)" />
       <textarea [ngModel]="newMealNotes()" placeholder="Notes (optional)" (ngModelChange)="newMealNotes.set($event)"></textarea>
 
       <div class="modal-actions">
