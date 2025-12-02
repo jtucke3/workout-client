@@ -43,11 +43,21 @@ export class Meals implements OnInit {
           this.meals.set(cached);
           this.recalculateCalories();
         }
+
+        // Load per-user calorie goal if present
+        const cachedGoal = this.loadGoalFromCache(resolvedUserId);
+        if (cachedGoal != null) {
+          this.calorieGoal = cachedGoal;
+        }
       }
 
       // If we have an active user, refresh from backend and update cache
       if (user?.id) {
         this.setLastUserId(user.id);
+        const cachedGoal = this.loadGoalFromCache(user.id);
+        if (cachedGoal != null) {
+          this.calorieGoal = cachedGoal;
+        }
         this.loadMeals(user.id);
       }
     });
@@ -77,6 +87,14 @@ export class Meals implements OnInit {
 
   get caloriesPercent() {
     return Math.min((this.caloriesConsumed() / this.calorieGoal) * 100, 100);
+  }
+
+  get goalMet() {
+    return this.caloriesConsumed() >= this.calorieGoal;
+  }
+
+  get caloriesRemaining() {
+    return Math.max(this.calorieGoal - this.caloriesConsumed(), 0);
   }
 
   async saveMeal() {
@@ -208,6 +226,7 @@ export class Meals implements OnInit {
   }
 
   private cacheKey(userId: string): string { return `meals_${userId}`; }
+  private goalKey(userId: string): string { return `calorieGoal_${userId}`; }
 
   private saveMealsToCache(userId: string, meals: { id: string; name: string; calories: number; time: Date; notes: string | null }[]): void {
     if (typeof window === 'undefined') return;
@@ -237,5 +256,47 @@ export class Meals implements OnInit {
 
   private resolveUserId(): string | null {
     return this.authUser.user()?.id ?? this.getLastUserId();
+  }
+
+  // -- Goal edit/persist --
+  showGoalEditor = signal(false);
+  goalInput = signal<number | null>(null);
+
+  openGoalEditor() {
+    this.goalInput.set(this.calorieGoal);
+    this.showGoalEditor.set(true);
+  }
+
+  saveGoal() {
+    const userId = this.resolveUserId();
+    if (!userId) {
+      this.showGoalEditor.set(false);
+      return;
+    }
+    const val = this.goalInput();
+    const safe = typeof val === 'number' && !isNaN(val) && val > 0 ? Math.round(val) : this.calorieGoal;
+    this.calorieGoal = safe;
+    this.saveGoalToCache(userId, safe);
+    this.showGoalEditor.set(false);
+  }
+
+  cancelGoalEdit() {
+    this.showGoalEditor.set(false);
+    this.goalInput.set(null);
+  }
+
+  private saveGoalToCache(userId: string, goal: number): void {
+    if (typeof window === 'undefined') return;
+    try { localStorage.setItem(this.goalKey(userId), String(goal)); } catch {}
+  }
+
+  private loadGoalFromCache(userId: string): number | null {
+    if (typeof window === 'undefined') return null;
+    try {
+      const raw = localStorage.getItem(this.goalKey(userId));
+      if (!raw) return null;
+      const parsed = Number(raw);
+      return isNaN(parsed) ? null : parsed;
+    } catch { return null; }
   }
 }
