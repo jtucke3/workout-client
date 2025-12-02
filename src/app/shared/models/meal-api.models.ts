@@ -1,6 +1,5 @@
-// Create meal request now uses email instead of userId
 export interface CreateMealRequestWebVo {
-  userEmail: string;
+  userId: string;
   name: string;
   calories: number;
   mealAtUtc: string;
@@ -9,6 +8,7 @@ export interface CreateMealRequestWebVo {
 
 export interface UpdateMealRequestWebVo {
   mealId: string;
+  userId: string;
   name: string;
   calories: number;
   mealAtUtc: string;
@@ -16,11 +16,11 @@ export interface UpdateMealRequestWebVo {
 }
 
 export interface MealResponseWebVo {
-  id: string;
-  userEmail: string;
+  mealId: string;
+  userId: string;
   name: string;
   calories: number;
   mealAtUtc: string;
-  notes: string;
+  notes: string | null;
   createdAt: string;
 }

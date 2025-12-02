@@ -30,18 +30,17 @@ export class MealService {
     return new HttpHeaders(headersInit);
   }
 
-  getMeals(userEmail: string): Promise<MealResponseWebVo[]> {
+  getMeals(userId: string): Promise<MealResponseWebVo[]> {
     const headers = this.buildHeaders();
-    const encodedEmail = encodeURIComponent(userEmail);
     return firstValueFrom(
-      this.http.get<MealResponseWebVo[]>(`${this.MEALS_API_BASE}/user/${encodedEmail}`, { headers })
+      this.http.get<MealResponseWebVo[]>(`${this.MEALS_API_BASE}/${userId}`, { headers })
     );
   }
 
   createMeal(payload: CreateMealRequestWebVo): Promise<MealResponseWebVo> {
     const headers = this.buildHeaders();
     return firstValueFrom(
-      this.http.post<MealResponseWebVo>(`${this.MEALS_API_BASE}/create`, payload, { headers })
+      this.http.post<MealResponseWebVo>(`${this.MEALS_API_BASE}/${payload.userId}`, payload, { headers })
     );
   }
 
@@ -49,14 +48,14 @@ export class MealService {
     const headers = this.buildHeaders();
     return firstValueFrom(
       this.http.put<MealResponseWebVo>(
-        `${this.MEALS_API_BASE}/${payload.mealId}`, payload, { headers })
+        `${this.MEALS_API_BASE}/${payload.userId}/${payload.mealId}`, payload, { headers })
     );
   }
 
-  deleteMeal(mealId: string): Promise<void> {
+  deleteMeal(userId: string, mealId: string): Promise<void> {
     const headers = this.buildHeaders();
     return firstValueFrom(
-      this.http.delete<void>(`${this.MEALS_API_BASE}/${mealId}`, { headers })
+      this.http.delete<void>(`${this.MEALS_API_BASE}/${userId}/${mealId}`, { headers })
     );
   }
 }
