@@ -21,9 +21,15 @@ export class Workouts {
   private authUser = inject(AuthUserService);
   // Signals for state (logic added later)
   workout = signal<WorkoutResponseWebVo | null>(null);
+  workoutsList = signal<WorkoutResponseWebVo[]>([]);
   loading = signal(false);
   error = signal<string | null>(null);
   showCreateModal = signal(false);
+  // When true, UI emphasizes rapid logging (newly created workout or manually entered)
+  loggingMode = signal(false);
+
+  // Per-exercise temporary set input state (weight/reps before adding set)
+  pendingSetInputs = signal<Record<string, { weight: number; reps: number }>>({});
 
   // Form state for creating workout
   createTitle = signal('');
@@ -74,11 +80,44 @@ export class Workouts {
       const w = await this.http.post<WorkoutResponseWebVo>(`/api/workouts?userId=${encodeURIComponent(uid)}`, body, { headers: this.headers() }).toPromise();
       this.workout.set(w || null);
       this.showCreateModal.set(false);
+      if (w) {
+        this.workoutsList.set([w, ...this.workoutsList()]);
+        // Enable logging mode immediately for fresh workout
+        this.loggingMode.set(true);
+      }
     } catch (e: any) {
       this.error.set(e?.message || 'Failed to create workout');
     } finally {
       this.loading.set(false);
     }
+  }
+
+  async loadWorkouts(): Promise<void> {
+    const uid = this.userId();
+    if (!uid) return;
+    try {
+      const list = await this.http.get<WorkoutResponseWebVo[]>(`/api/workouts?userId=${encodeURIComponent(uid)}`, { headers: this.headers() }).toPromise();
+      this.workoutsList.set(list || []);
+    } catch (e: any) {
+      this.error.set(e?.message || 'Failed to load workouts');
+    }
+  }
+
+  viewWorkout(w: WorkoutResponseWebVo): void {
+    this.workout.set(w);
+    // Enter logging mode if workout has no exercises yet (likely actively logging)
+    this.loggingMode.set(w.exercises.length === 0);
+  }
+
+  backToList(): void {
+    this.workout.set(null);
+    this.loggingMode.set(false);
+  }
+
+  // lifecycle-like init (standalone component, no ngOnInit imported)
+  constructor() {
+    // attempt initial load if user id present
+    setTimeout(() => this.loadWorkouts(), 0);
   }
 
   async addExercise(): Promise<void> {
@@ -120,6 +159,45 @@ export class Workouts {
     } finally {
       this.loading.set(false);
     }
+  }
+
+  // Quick add set with initial weight/reps: create empty set then update values
+  async quickAddSet(ex: ExerciseResponseWebVo): Promise<void> {
+    const w = this.workout();
+    if (!w) return;
+    const inputs = this.pendingSetInputs()[ex.id] || { weight: 0, reps: 0 };
+    this.loading.set(true);
+    this.error.set(null);
+    try {
+      // Create new set (empty)
+      const createdEx = await this.http.post<ExerciseResponseWebVo>(`/api/workouts/${w.id}/exercises/${ex.id}/sets`, {}, { headers: this.headers() }).toPromise();
+      if (createdEx) {
+        // Find the newly added set (assume last)
+        const newSet = createdEx.sets[createdEx.sets.length - 1];
+        // Update with provided weight/reps if any non-zero
+        if (newSet && (inputs.weight > 0 || inputs.reps > 0)) {
+          await this.http.put(`/api/workouts/${w.id}/exercises/${ex.id}/sets/${newSet.setId}`, { setId: newSet.setId, weight: inputs.weight, reps: inputs.reps }, { headers: this.headers() }).toPromise();
+          // Reload exercise after update
+          const refreshedEx = await this.http.get<ExerciseResponseWebVo>(`/api/workouts/${w.id}/exercises/${ex.id}`, { headers: this.headers() }).toPromise().catch(() => null);
+          if (refreshedEx) this.replaceExercise(refreshedEx); else this.replaceExercise(createdEx);
+        } else {
+          this.replaceExercise(createdEx);
+        }
+      }
+      // Reset inputs for this exercise
+      const clone = { ...this.pendingSetInputs() }; delete clone[ex.id]; this.pendingSetInputs.set(clone);
+    } catch (e: any) {
+      this.error.set(e?.message || 'Failed to quick add set');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  setPendingSetValue(exId: string, field: 'weight' | 'reps', value: number): void {
+    const current = this.pendingSetInputs();
+    const existing = current[exId] || { weight: 0, reps: 0 };
+    const updated = { ...current, [exId]: { ...existing, [field]: value } };
+    this.pendingSetInputs.set(updated);
   }
 
   async removeSet(ex: ExerciseResponseWebVo, set: SetResponseWebVo): Promise<void> {
@@ -171,5 +249,9 @@ export class Workouts {
       ...w,
       exercises: w.exercises.map(e => e.id === updated.id ? updated : e)
     });
+    // If exercise now has sets, keep logging mode but allow continuing
+    if (this.loggingMode() && w.exercises.every(ex => ex.sets.length > 0)) {
+      // Logging mode persists unless user leaves
+    }
   }
 }

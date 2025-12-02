@@ -3,10 +3,14 @@
 <main class="workouts-content">
 	<!-- Header -->
 	<div class="workouts-header" *ngIf="!workout()">
-		<h1>🏋️ New Workout</h1>
+		<h1>🏋️ Workouts</h1>
+		<div class="meta">
+		  <button class="refresh-btn" (click)="loadWorkouts()" [disabled]="loading()">Refresh</button>
+		</div>
 	</div>
 	<div class="workouts-header" *ngIf="workout()">
-		<h1>🏋️ Workout</h1>
+		<h1 *ngIf="!loggingMode()">🏋️ Workout</h1>
+		<h1 *ngIf="loggingMode()">📝 Logging Workout</h1>
 		<div class="meta" *ngIf="workout() as w">
 			<span class="timestamp">{{ w.workoutAt }}</span>
 		</div>
@@ -14,6 +18,28 @@
 
 		<!-- Floating Log Workout Button -->
 		<button class="add-workout-btn" (click)="showCreateModal.set(true)">Log Workout</button>
+
+		<!-- Workouts List -->
+		<div class="workouts-list" *ngIf="!workout()">
+			<ng-container *ngIf="workoutsList().length; else emptyList">
+				<div class="workouts-grid">
+					<div class="workout-card-mini" *ngFor="let w of workoutsList()">
+						<div class="wc-header">
+							<h3>{{ w.title }}</h3>
+							<span class="date-chip">{{ w.workoutAt }}</span>
+						</div>
+						<p class="wc-notes" *ngIf="w.notes">{{ w.notes }}</p>
+						<div class="wc-meta">
+							<span>{{ w.exercises.length }} exercises</span>
+							<button class="open-btn" (click)="viewWorkout(w)">Open</button>
+						</div>
+					</div>
+				</div>
+			</ng-container>
+			<ng-template #emptyList>
+				<p class="empty-hint">No workouts yet. Use Log Workout to create one.</p>
+			</ng-template>
+		</div>
 
 		<!-- Create Workout Modal -->
 		<div class="modal-backdrop" *ngIf="showCreateModal()">
@@ -47,7 +73,9 @@
 	<div class="workout-detail" *ngIf="workout() as w">
 		<div class="workout-header-card">
 			<h2>{{ w.title }}</h2>
+			<button class="back-btn" (click)="backToList()">← Back</button>
 			<p class="notes" *ngIf="w.notes">{{ w.notes }}</p>
+			<div class="logging-hint" *ngIf="loggingMode()">Rapid logging mode: add exercises and sets quickly.</div>
 		</div>
 
 		<!-- Add Exercise Card -->
@@ -76,6 +104,13 @@
 					</div>
 				</div>
 				<p class="ex-notes" *ngIf="ex.notes">{{ ex.notes }}</p>
+
+				<!-- Quick Add Set Row (logging mode) -->
+				<div class="quick-add-set" *ngIf="loggingMode()">
+					<input type="number" min="0" placeholder="Weight" [value]="pendingSetInputs()[ex.id]?.weight || ''" (input)="setPendingSetValue(ex.id,'weight',$any($event.target).valueAsNumber)" (keyup.enter)="quickAddSet(ex)" />
+					<input type="number" min="0" placeholder="Reps" [value]="pendingSetInputs()[ex.id]?.reps || ''" (input)="setPendingSetValue(ex.id,'reps',$any($event.target).valueAsNumber)" (keyup.enter)="quickAddSet(ex)" />
+					<button class="quick-add-btn" (click)="quickAddSet(ex)" [disabled]="loading()">Add Set</button>
+				</div>
 				<div class="sets-wrapper" *ngIf="ex.sets.length; else noSetsTemplate">
 					<table class="sets-table">
 						<thead>
