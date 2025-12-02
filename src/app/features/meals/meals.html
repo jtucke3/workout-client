@@ -50,8 +50,8 @@
         <div class="meal-calories">{{ meal.calories }} kcal</div>
       </div>
       <div class="meal-actions">
-        <button class="edit-btn" (click)="editMeal(i)">Edit/View</button>
-        <button class="delete-btn" (click)="deleteMeal(i)">Delete</button>
+          <button class="edit-btn" (click)="editMeal(meal.id)">Edit/View</button>
+          <button class="delete-btn" [disabled]="deletingId() === meal.id" (click)="deleteMeal(meal.id)">Delete</button>
       </div>
     </div>
   </section>

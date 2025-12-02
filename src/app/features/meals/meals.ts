@@ -26,6 +26,7 @@ export class Meals implements OnInit {
 
   showAddMeal = signal(false);
   editingIndex: number | null = null;
+  deletingId = signal<string | null>(null);
 
   newMealName = signal('');
   newMealCalories = signal(0);
@@ -170,7 +171,9 @@ export class Meals implements OnInit {
     }
   }
 
-  editMeal(index: number) {
+  editMeal(mealId: string) {
+    const index = this.meals().findIndex(m => m.id === mealId);
+    if (index < 0) return;
     const meal = this.meals()[index];
     this.editingIndex = index;
     this.newMealName.set(meal.name);
@@ -180,19 +183,23 @@ export class Meals implements OnInit {
   }
   
 
-  async deleteMeal(index: number) {
+  async deleteMeal(mealId: string) {
+    console.debug('Delete clicked for mealId:', mealId);
+    const index = this.meals().findIndex(m => m.id === mealId);
+    if (index < 0) return;
     const meal = this.meals()[index];
     const userId = this.resolveUserId();
     if (!userId) return;
     try {
+      this.deletingId.set(mealId);
       await this.mealService.deleteMeal(userId, meal.id);
-      const updated = [...this.meals()];
-      updated.splice(index, 1);
-      this.meals.set(updated);
-      this.recalculateCalories();
-      this.saveMealsToCache(userId, this.meals());
+      // Refetch the user's meals to ensure UI stays in sync
+      await this.loadMeals(userId);
     } catch (err) {
       console.error('Failed to delete meal:', err);
+    }
+    finally {
+      this.deletingId.set(null);
     }
   }
 
