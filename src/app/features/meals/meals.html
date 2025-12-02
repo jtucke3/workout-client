@@ -35,9 +35,10 @@
   <div class="modal-backdrop" *ngIf="showAddMeal()">
     <div class="modal-card">
       <h3>{{ editingIndex !== null ? 'Edit Meal' : 'Add a Meal' }}</h3>
-      <input type="text" placeholder="Meal Name" [(ngModel)]="newMealName" />
-      <input type="number" placeholder="Calories" [(ngModel)]="newMealCalories" />
-      <textarea placeholder="Notes (optional)" [(ngModel)]="newMealNotes"></textarea>
+      <input [ngModel]="newMealName()" placeholder="Meal Name" (ngModelChange)="newMealName.set($event)" />
+      <input type="number" [ngModel]="newMealCalories()" placeholder="Calories" (ngModelChange)="newMealCalories.set($event)" />
+      <textarea [ngModel]="newMealNotes()" placeholder="Notes (optional)" (ngModelChange)="newMealNotes.set($event)"></textarea>
+
       <div class="modal-actions">
         <button class="blue-btn" (click)="saveMeal()">
           {{ editingIndex !== null ? 'Save Changes' : 'Add' }}
