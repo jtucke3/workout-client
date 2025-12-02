@@ -48,6 +48,13 @@
 
 /* Workouts list grid */
 .workouts-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:1.25rem; margin-bottom:2rem; }
+.tabs { display:flex; gap:.5rem; margin:0 0 1rem; }
+.tabs button { padding:8px 14px; background:rgba(148,163,184,.12); color:#e2e8f0; border:1px solid rgba(148,163,184,.25); border-radius:10px; font-weight:700; cursor:pointer; transition:.2s; }
+.tabs button:hover { background:rgba(148,163,184,.22); }
+.tabs button.active { background:rgba(59,130,246,.25); border-color:rgba(59,130,246,.45); color:#93c5fd; }
+
+.calendar-controls { display:flex; gap:.6rem; align-items:center; margin-bottom:1rem; }
+.calendar-controls input[type="date"] { padding:8px 10px; background:rgba(51,65,85,.75); border:1px solid rgba(148,163,184,.25); color:#fff; border-radius:8px; }
 .workout-card-mini { background:rgba(30,41,59,.85); border:1px solid rgba(148,163,184,.15); border-radius:14px; padding:1rem 1.2rem; display:grid; gap:.6rem; box-shadow:0 6px 20px rgba(0,0,0,.3); transition:.25s; }
 .workout-card-mini:hover { border-color:rgba(148,163,184,.3); box-shadow:0 10px 28px rgba(0,0,0,.4); transform:translateY(-3px); }
 .workout-card-mini h3 { margin:0; font-size:1.05rem; font-weight:700; color:#fff; }
@@ -57,15 +64,23 @@
 .wc-meta { display:flex; justify-content:space-between; align-items:center; font-size:.65rem; color:#94a3b8; }
 .open-btn { padding:6px 12px; background:linear-gradient(135deg,#3b82f6,#2563eb); border:none; color:#fff; font-size:.65rem; font-weight:700; letter-spacing:.5px; border-radius:8px; cursor:pointer; box-shadow:0 4px 12px rgba(59,130,246,.35); transition:.2s; }
 .open-btn:hover { transform:translateY(-2px); box-shadow:0 6px 16px rgba(59,130,246,.45); }
+.open-btn.danger { background:linear-gradient(135deg,#ef4444,#dc2626); box-shadow:0 4px 12px rgba(239,68,68,.35); }
+.open-btn.danger:hover { box-shadow:0 6px 16px rgba(239,68,68,.45); }
 .empty-hint { font-size:.8rem; color:#94a3b8; padding:.75rem 0 1.5rem; }
-.back-btn { position:absolute; top:1.25rem; right:1.25rem; background:rgba(148,163,184,.15); color:#cbd5e1; border:none; padding:6px 14px; border-radius:10px; cursor:pointer; font-size:.7rem; font-weight:600; letter-spacing:.5px; transition:.2s; }
-.back-btn:hover { background:rgba(148,163,184,.3); }
+.primary-btn { padding:10px 16px; background:linear-gradient(135deg,#3b82f6,#2563eb); color:#fff; border:none; border-radius:10px; font-weight:700; cursor:pointer; box-shadow:0 4px 12px rgba(59,130,246,.35); transition:.2s; }
+.primary-btn:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(59,130,246,.45); }
+.primary-btn:disabled { opacity:.6; cursor:not-allowed; }
+
+.ghost-btn { padding:10px 16px; background:rgba(148,163,184,.12); color:#e2e8f0; border:1px solid rgba(148,163,184,.25); border-radius:10px; font-weight:700; cursor:pointer; transition:.2s; }
+.ghost-btn:hover { background:rgba(148,163,184,.22); }
 .workout-header-card { position:relative; }
 .refresh-btn { padding:8px 16px; background:rgba(59,130,246,.25); color:#60a5fa; border:1px solid rgba(59,130,246,.4); border-radius:10px; font-size:.7rem; font-weight:600; letter-spacing:.5px; cursor:pointer; transition:.2s; }
 .refresh-btn:hover { background:rgba(59,130,246,.4); }
 
-.workout-header-card h2 { margin:0 0 .5rem; font-size:1.8rem; font-weight:700; color:#fff; }
-.workout-header-card .notes { margin:.25rem 0 0; font-size:.9rem; color:#94a3b8; }
+.workout-title-edit { display:flex; gap:.6rem; align-items:center; }
+.workout-title-edit input { flex:1; padding:10px; background:rgba(51,65,85,.75); border:1px solid rgba(148,163,184,.25); color:#fff; border-radius:10px; font-size:1.2rem; font-weight:700; }
+.notes-edit { margin:.5rem 0 0; }
+.notes-edit input { width:100%; padding:10px; background:rgba(51,65,85,.75); border:1px solid rgba(148,163,184,.25); color:#fff; border-radius:10px; font-size:.9rem; }
 
 .workout-form .form-row { margin-bottom:1.1rem; }
 .workout-form .two-col { display:grid; gap:1rem; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); }
@@ -98,9 +113,10 @@
 .exercise-actions { display:flex; gap:.4rem; }
 .action-btn { width:36px; height:36px; border:none; background:rgba(148,163,184,.15); color:#94a3b8; border-radius:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1rem; transition:.2s; }
 .action-btn:hover { background:rgba(148,163,184,.25); transform:scale(1.05); }
-.action-btn.save { color:#60a5fa; }
-.action-btn.save:hover { background:rgba(59,130,246,.25); color:#93c5fd; }
-.action-btn.danger:hover { background:rgba(239,68,68,.25); color:#ef4444; }
+.action-btn.save { color:#60a5fa; background:rgba(59,130,246,.2); }
+.action-btn.save:hover { background:rgba(59,130,246,.3); color:#93c5fd; }
+.action-btn.danger { height:auto; padding:8px 12px; font-size:.75rem; font-weight:700; color:#fff; background:linear-gradient(135deg,#ef4444,#dc2626); box-shadow:0 4px 12px rgba(239,68,68,.35); }
+.action-btn.danger:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(239,68,68,.45); }
 
 .ex-notes { margin:.4rem 0 .75rem; font-size:.75rem; color:#94a3b8; }
 
@@ -111,6 +127,19 @@
 .sets-table tbody tr:nth-child(even){ background:rgba(148,163,184,.07); }
 .set-input { width:80px; padding:6px 8px; background:rgba(51,65,85,.75); border:1px solid rgba(148,163,184,.25); color:#fff; border-radius:6px; font-size:.7rem; }
 .set-input:focus { outline:none; border-color:#3b82f6; box-shadow:0 0 0 2px rgba(59,130,246,.3); }
+
+/* Dark styling for inline exercise entry inputs in workout detail */
+.workout-detail input[type="text"] {
+	padding:10px;
+	background:rgba(51,65,85,.75);
+	border:1px solid rgba(148,163,184,.25);
+	color:#fff;
+	border-radius:10px;
+	font-size:.85rem;
+}
+.workout-detail input[type="text"]:focus { outline:none; border-color:#10b981; box-shadow:0 0 0 2px rgba(16,185,129,.35); }
+.workout-detail .add-ex-btn { margin-top:.5rem; }
+.workout-detail .exercise-entry-row { display:grid; grid-template-columns:1.5fr 1fr 1.5fr auto; gap:.6rem; align-items:center; }
 
 .empty-state { text-align:center; padding:3rem 1rem; }
 .empty-state .empty-icon { font-size:3rem; margin-bottom:.75rem; }

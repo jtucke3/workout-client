@@ -114,7 +114,7 @@
     &:active { transform: translateY(1px); }
   }
 
-  /* 🔹 Responsive behavior for small screens */
+  /* Responsive behavior on small screens */
   @media (max-width: 768px) {
     flex-wrap: wrap;
     height: auto;

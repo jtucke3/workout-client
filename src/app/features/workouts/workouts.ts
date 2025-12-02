@@ -22,6 +22,9 @@ export class Workouts {
   // Signals for state (logic added later)
   workout = signal<WorkoutResponseWebVo | null>(null);
   workoutsList = signal<WorkoutResponseWebVo[]>([]);
+  // Tabs: 'recents' | 'calendar'
+  activeTab = signal<'recents' | 'calendar'>('recents');
+  selectedDate = signal<string>('');
   loading = signal(false);
   error = signal<string | null>(null);
   showCreateModal = signal(false);
@@ -35,6 +38,10 @@ export class Workouts {
   createTitle = signal('');
   createDate = signal(this.defaultDateTime());
   createNotes = signal('');
+
+  // Edit state for selected workout
+  editTitle = signal('');
+  editNotes = signal('');
 
   // Form state for adding exercise
   exName = signal('');
@@ -97,7 +104,8 @@ export class Workouts {
     if (!uid) return;
     try {
       const list = await this.http.get<WorkoutResponseWebVo[]>(`/api/workouts?userId=${encodeURIComponent(uid)}`, { headers: this.headers() }).toPromise();
-      this.workoutsList.set(list || []);
+      const sorted = (list || []).slice().sort((a,b) => new Date(b.workoutAt).getTime() - new Date(a.workoutAt).getTime());
+      this.workoutsList.set(sorted);
     } catch (e: any) {
       this.error.set(e?.message || 'Failed to load workouts');
     }
@@ -107,11 +115,103 @@ export class Workouts {
     this.workout.set(w);
     // Enter logging mode if workout has no exercises yet (likely actively logging)
     this.loggingMode.set(w.exercises.length === 0);
+    // Initialize edit fields
+    this.editTitle.set(w.title || '');
+    this.editNotes.set(w.notes || '');
   }
 
-  backToList(): void {
+  // Explicitly start logging for an existing workout
+  startWorkout(w: WorkoutResponseWebVo): void {
+    this.workout.set(w);
+    this.loggingMode.set(true);
+    this.editTitle.set(w.title || '');
+    this.editNotes.set(w.notes || '');
+  }
+
+  async backToList(): Promise<void> {
+    // Persist any workout title/notes edits and set changes before leaving
+    await this.finalizeWorkoutChanges();
     this.workout.set(null);
     this.loggingMode.set(false);
+    this.editTitle.set('');
+    this.editNotes.set('');
+    // default to recents tab when returning
+    this.activeTab.set('recents');
+  }
+
+  private async finalizeWorkoutChanges(): Promise<void> {
+    const w = this.workout();
+    if (!w) return;
+    this.loading.set(true);
+    try {
+      // Update workout title/notes if changed
+      const nextTitle = (this.editTitle().trim() || w.title);
+      const nextNotes = (this.editNotes().trim() || null);
+      if (nextTitle !== w.title || nextNotes !== (w.notes || null)) {
+        const updated = await this.http.put<WorkoutResponseWebVo>(`/api/workouts/${w.id}`,
+          { title: nextTitle, notes: nextNotes, workoutAt: w.workoutAt },
+          { headers: this.headers() }
+        ).toPromise().catch(() => null);
+        if (updated) {
+          this.workout.set(updated);
+          this.workoutsList.set(this.workoutsList().map(x => x.id === updated.id ? updated : x));
+        }
+      }
+
+      // Persist any exercise field edits (name, notes, equipment, bodyPart) if backend supports it
+      const exerciseUpdateOps: Promise<any>[] = [];
+      for (const ex of w.exercises) {
+        exerciseUpdateOps.push(
+          this.http.put(`/api/workouts/${w.id}/exercises/${ex.id}`,
+            { id: ex.id, name: ex.name, notes: ex.notes || '', equipment: ex.equipment || '', bodyPart: ex.bodyPart || '' },
+            { headers: this.headers() }
+          ).toPromise().catch(() => null)
+        );
+      }
+      if (exerciseUpdateOps.length) {
+        await Promise.all(exerciseUpdateOps);
+      }
+
+      // Persist any set edits inline (weight/reps changes)
+      const ops: Promise<any>[] = [];
+      const current = this.workout();
+      if (current) {
+        for (const ex of current.exercises) {
+          for (const s of ex.sets) {
+            ops.push(
+              this.http.put(`/api/workouts/${current.id}/exercises/${ex.id}/sets/${s.setId}`,
+                { setId: s.setId, weight: s.weight, reps: s.reps },
+                { headers: this.headers() }
+              ).toPromise().catch(() => null)
+            );
+          }
+        }
+      }
+      if (ops.length) {
+        await Promise.all(ops);
+      }
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async removeWorkout(w: WorkoutResponseWebVo): Promise<void> {
+    if (!w) return;
+    this.loading.set(true);
+    this.error.set(null);
+    try {
+      await this.http.delete(`/api/workouts/${w.id}`, { headers: this.headers() }).toPromise();
+      // Remove from list
+      this.workoutsList.set(this.workoutsList().filter(x => x.id !== w.id));
+      // If currently viewing this workout, return to list
+      if (this.workout()?.id === w.id) {
+        this.backToList();
+      }
+    } catch (e: any) {
+      this.error.set(e?.message || 'Failed to remove workout');
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   // lifecycle-like init (standalone component, no ngOnInit imported)
@@ -198,6 +298,67 @@ export class Workouts {
     const existing = current[exId] || { weight: 0, reps: 0 };
     const updated = { ...current, [exId]: { ...existing, [field]: value } };
     this.pendingSetInputs.set(updated);
+  }
+
+  // Filter workouts by selected date (YYYY-MM-DD)
+  workoutsByDate(): WorkoutResponseWebVo[] {
+    const dateStr = this.selectedDate();
+    if (!dateStr) return [];
+    const d = new Date(dateStr);
+    const y = d.getFullYear();
+    const m = d.getMonth();
+    const day = d.getDate();
+    return this.workoutsList().filter(w => {
+      const wd = new Date(w.workoutAt);
+      return wd.getFullYear() === y && wd.getMonth() === m && wd.getDate() === day;
+    });
+  }
+
+  async removeExercise(ex: ExerciseResponseWebVo): Promise<void> {
+    const w = this.workout();
+    if (!w) return;
+    this.loading.set(true);
+    this.error.set(null);
+    try {
+      const updated = await this.http.delete<WorkoutResponseWebVo>(`/api/workouts/${w.id}/exercises/${ex.id}`, { headers: this.headers() }).toPromise();
+      if (updated) {
+        this.workout.set(updated);
+        this.workoutsList.set(this.workoutsList().map(x => x.id === updated.id ? updated : x));
+      } else {
+        this.workout.set({ ...w, exercises: w.exercises.filter(e => e.id !== ex.id) });
+      }
+    } catch (e: any) {
+      this.error.set(e?.message || 'Failed to remove exercise');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async updateWorkout(): Promise<void> {
+    const w = this.workout();
+    if (!w) return;
+    this.loading.set(true);
+    this.error.set(null);
+    const body = {
+      title: this.editTitle().trim() || w.title,
+      notes: this.editNotes().trim() || null,
+      workoutAt: w.workoutAt
+    };
+    try {
+      const updated = await this.http.put<WorkoutResponseWebVo>(`/api/workouts/${w.id}`, body, { headers: this.headers() }).toPromise();
+      if (updated) {
+        this.workout.set(updated);
+        // keep edit fields in sync
+        this.editTitle.set(updated.title || '');
+        this.editNotes.set(updated.notes || '');
+        // also refresh list entry
+        this.workoutsList.set(this.workoutsList().map(x => x.id === updated.id ? updated : x));
+      }
+    } catch (e: any) {
+      this.error.set(e?.message || 'Failed to update workout');
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   async removeSet(ex: ExerciseResponseWebVo, set: SetResponseWebVo): Promise<void> {
