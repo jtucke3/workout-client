@@ -54,8 +54,10 @@ export class MealService {
 
   deleteMeal(userId: string, mealId: string): Promise<void> {
     const headers = this.buildHeaders();
+    const url = `${this.MEALS_API_BASE}/${userId}/${mealId}`;
+    console.debug('[MealService] DELETE', url);
     return firstValueFrom(
-      this.http.delete<void>(`${this.MEALS_API_BASE}/${userId}/${mealId}`, { headers })
+      this.http.delete<void>(url, { headers })
     );
   }
 }

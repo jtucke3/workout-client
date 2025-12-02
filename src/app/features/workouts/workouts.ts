@@ -197,10 +197,12 @@ export class Workouts {
 
   async removeWorkout(w: WorkoutResponseWebVo): Promise<void> {
     if (!w) return;
+    const uid = this.userId();
+    if (!uid) { this.error.set('No user id found. Login first.'); return; }
     this.loading.set(true);
     this.error.set(null);
     try {
-      await this.http.delete(`/api/workouts/${w.id}`, { headers: this.headers() }).toPromise();
+      await this.http.delete(`/api/workouts/${w.id}?userId=${encodeURIComponent(uid)}`, { headers: this.headers() }).toPromise();
       // Remove from list
       this.workoutsList.set(this.workoutsList().filter(x => x.id !== w.id));
       // If currently viewing this workout, return to list
