@@ -13,5 +13,6 @@ export const routes: Routes = [
   { path: 'register', loadComponent: () => import('./features/register/register').then(m => m.Register) },
   { path: 'forgot-password', loadComponent: () => import('./features/forgot-password/forgot-password').then(m => m.ForgotPassword) },
   { path: 'workouts', canActivate: [authGuard], loadComponent: () => import('./features/workouts/workouts').then(m => m.Workouts) },
+  { path: 'friend-profile', canActivate: [authGuard], loadComponent: () => import('./features/friends/friend-profile/friend-profile').then(m => m.FriendProfile) },
   { path: '**', redirectTo: 'login' } 
 ];

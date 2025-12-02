@@ -1,0 +1,121 @@
+.friend-profile-page {
+  padding: 5.5rem 1.75rem 2.5rem;
+  max-width: 960px;
+  margin: 0 auto;
+  color: #e5e7eb;
+}
+
+.friend-profile-card {
+  background: rgba(15, 23, 42, 0.95);
+  border-radius: 18px;
+  padding: 1.75rem 1.9rem;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.9);
+}
+
+.friend-profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.4rem;
+
+  h2 {
+    font-size: 1.45rem;
+    font-weight: 700;
+    margin: 0;
+  }
+}
+
+.privacy-pill {
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  color: #e5e7eb;
+  background: rgba(15, 23, 42, 0.8);
+
+  &.private {
+    border-color: rgba(239, 68, 68, 0.8);
+    color: #fecaca;
+    background: rgba(127, 29, 29, 0.3);
+  }
+}
+
+.friend-profile-body {
+  min-height: 160px;
+}
+
+.friend-profile-loading,
+.friend-profile-error {
+  font-size: 0.95rem;
+  color: #9ca3af;
+}
+
+.friend-profile-error {
+  color: #fecaca;
+}
+
+.private-overlay {
+  border-radius: 12px;
+  border: 1px dashed rgba(148, 163, 184, 0.6);
+  background: rgba(15, 23, 42, 0.7);
+  padding: 1rem 1.1rem;
+  text-align: left;
+
+  .private-title {
+    font-weight: 600;
+    margin: 0 0 0.25rem;
+  }
+
+  .private-caption {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #9ca3af;
+  }
+}
+
+.friend-sections {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.4rem;
+}
+
+.friend-section {
+  h3 {
+    font-size: 1rem;
+    margin: 0 0 0.4rem;
+  }
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  li {
+    padding: 0.45rem 0;
+    border-bottom: 1px solid rgba(30, 64, 175, 0.3);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+}
+
+.item-name {
+  font-weight: 500;
+}
+
+.item-meta {
+  font-size: 0.85rem;
+  color: #9ca3af;
+
+  span + span {
+    margin-left: 0.35rem;
+  }
+}
+
+.empty-message {
+  font-size: 0.9rem;
+  color: #9ca3af;
+}

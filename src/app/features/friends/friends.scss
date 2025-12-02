@@ -157,17 +157,22 @@
   }
 }
 
-/* REUSED PIECES */
-
 .friend-info {
   display: flex;
   flex-direction: column;
+}
 
-  .friend-name {
-    font-weight: 600;
-    font-size: 0.98rem;
+.friend-name-link {
+  font-weight: 600;
+  font-size: 0.98rem;
+  color: #e5e7eb;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
   }
 }
+
 
 .friend-actions {
   display: flex;
