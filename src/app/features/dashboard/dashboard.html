@@ -19,73 +19,52 @@
     </button>
   </section>
 
-  <!-- SECTION: Meals + Calories -->
-  <section class="section-card">
-    <div class="section-header">
-      <h3>Your Meals</h3>
-      <p>Last recorded meal: {{ lastMealName || 'None yet' }}</p>
+  <!-- Calorie Tracking Bar -->
+  <section class="calorie-card">
+    <div class="calorie-header">
+      <div class="calorie-left">
+        <h2>Calories Today</h2>
+        <span class="remaining-large" [class.over]="goalMet">
+          <ng-container *ngIf="!goalMet; else overLargeTpl">Remaining: {{ caloriesRemaining }} kcal</ng-container>
+          <ng-template #overLargeTpl>Over by: {{ (caloriesConsumed() - calorieGoal) }} kcal</ng-template>
+        </span>
+      </div>
     </div>
 
-    <!-- Calorie bar -->
     <div class="calorie-bar">
-      <div class="calorie-fill" [style.width.%]="caloriesPercent || 0"></div>
+      <div class="calorie-fill" [ngClass]="{ 'goal-met': goalMet }" [style.width.%]="caloriesPercent"></div>
     </div>
-    <p class="calorie-info">
-      {{ caloriesConsumed || 0 }} / {{ calorieGoal || 2000 }} kcal
-    </p>
 
-    <button class="blue-btn" routerLink="/meals">
-      Add Meal
-    </button>
+    <div class="calorie-meta">
+      <p class="calorie-info">{{ caloriesConsumed() }} / {{ calorieGoal }} kcal</p>
+      <div class="goal-banner" *ngIf="goalMet">
+        <span>🎉 Goal reached! Great job!</span>
+      </div>
+    </div>
   </section>
 
   <!-- SECTION: Friends Table -->
   <section class="section-card">
-  <div class="section-header">
-    <h3>Friends Activity</h3>
-    <p>Latest workouts from your friends</p>
-  </div>
+    <div class="section-header">
+      <h3>Your Friends</h3>
+    </div>
 
-  <div class="table-container">
-    <table class="friends-table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Workout</th>
-          <th>Date</th>
-        </tr>
-      </thead>
+    <div class="table-container" *ngIf="friendsPreview().length > 0; else noFriendsTpl">
+      <ul class="friends-list-preview">
+        <li *ngFor="let f of friendsPreview()">
+          <span>{{ f.displayName }}</span>
+        </li>
+      </ul>
+    </div>
 
-      <tbody>
-        <tr *ngFor="let f of friends">
-          <td>{{ f.name }}</td>
-          <td>{{ f.workout }}</td>
-          <td>{{ f.date | date:'short' }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+    <ng-template #noFriendsTpl>
+      <p>You have no friends yet. Add some to see them here!</p>
+    </ng-template>
+
 
   <button class="blue-btn" routerLink="/friends">
     View All Activity
   </button>
 </section>
-
-
-  <!-- SECTION: Goal Progress -->
-  <section class="section-card">
-    <div class="section-header">
-      <h3>Your Goal Progress</h3>
-      <p>{{ goalTitle || 'Progress toward your goal' }}</p>
-    </div>
-
-    <div class="goal-bar">
-      <div class="goal-fill" [style.width.%]="goalPercent || 0"></div>
-    </div>
-
-    <button class="blue-btn" routerLink="/goals">
-      View Goal
-    </button>
-  </section>
 
 </main>
